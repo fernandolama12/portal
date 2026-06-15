@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Portal" />
+  <meta name="theme-color" content="#fafaf9" />
+  <link rel="apple-touch-icon" href="logos/notions-group-icon.png" />
+  <link rel="icon" type="image/png" href="logos/notions-group-icon.png" />
+  <title>Portal · Fernando</title>
+
+  <!--
+  ═══════════════════════════════════════════════════════════════════════════
+   EDIT HERE the links for each tool.
+   Change the URL strings between quotes. Leave "" for "pending".
+  ═══════════════════════════════════════════════════════════════════════════
+  -->
+  <script>
+    const PORTAL = [
+      {
+        company: 'Notions',
+        logo: 'logos/notions.png',
+        glow: '15, 86, 66',
+        tools: [
+          { name: 'Notions Vision', description: 'KPI portal and observability', url: 'https://vision.notions.com.do' },
+        ],
+      },
+      {
+        company: 'GTG',
+        logo: 'logos/gtg.png',
+        glow: '185, 28, 28',
+        tools: [
+          { name: 'Librel Vision', description: 'KPIs and turnaround · deploy pending', url: 'https://librel.gtg.com.do' },
+        ],
+      },
+      {
+        company: 'NOW Logistics',
+        logo: 'logos/now.png',
+        glow: '49, 46, 129',
+        tools: [
+          { name: 'NowTrack', description: 'Tracking and logistics operations', url: 'https://nowtrack.com.do' },
+        ],
+      },
+      {
+        company: 'Print Pilot',
+        logo: 'logos/printpilot.png',
+        glow: '14, 165, 233',
+        tools: [
+          { name: 'PP NowTrack', description: 'Logistics tracking for Print Pilot', url: 'https://stage-printpilot.nowtrack.com.do' },
+          { name: 'PPC', description: 'PrintFlow Customizer', url: 'https://printpilot.store' },
+          { name: 'PPQ', description: 'PrintPilot Quotes', url: 'https://ppq.printpilot.store' },
+        ],
+      },
+    ]
+
+    const INSIGHTS = [
+      'Connecting to your tools',
+      'Synced across Mac · iPad · iPhone',
+      'Notions Group',
+      'Your operational cockpit',
+      'All systems operational',
+    ]
+  </script>
+
+  <style>
+    :root {
+      --bg-base: #fafaf9;
+      --bg-tint: #f5f5f4;
+      --ink: #18181b;
+      --ink-muted: #52525b;
+      --ink-dim: #a1a1aa;
+      --ink-subtle: #d4d4d8;
+      --border: rgba(0, 0, 0, 0.06);
+      --border-strong: rgba(0, 0, 0, 0.10);
+      --surface: rgba(255, 255, 255, 0.65);
+      --surface-hover: rgba(255, 255, 255, 0.88);
+      --surface-solid: #ffffff;
+      --live: #16a34a;
+      --hud-purple: rgba(124, 58, 237, 0.55);
+      --hud-blue: rgba(37, 99, 235, 0.55);
+      --hud-dim: rgba(0, 0, 0, 0.25);
+      --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.04);
+      --shadow-card-hover: 0 1px 3px rgba(0, 0, 0, 0.06), 0 16px 40px rgba(0, 0, 0, 0.06);
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html { -webkit-text-size-adjust: 100%; }
+    html, body { margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg-base);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+      min-height: 100dvh;
+      overflow-x: hidden;
+      overflow-y: auto;
+      position: relative;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ═══════════════════════════════════════════ Animated background (pastel) */
+    .bg-mesh {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      will-change: transform;
+    }
+    .blob-1 {
+      width: 55vw; height: 55vw;
+      background: radial-gradient(circle, #c4b5fd, transparent 70%);
+      top: -25%; left: -15%;
+      opacity: 0.45;
+      animation: blob-1 22s ease-in-out infinite;
+    }
+    .blob-2 {
+      width: 50vw; height: 50vw;
+      background: radial-gradient(circle, #bae6fd, transparent 70%);
+      top: 25%; right: -20%;
+      opacity: 0.5;
+      animation: blob-2 28s ease-in-out infinite;
+    }
+    .blob-3 {
+      width: 45vw; height: 45vw;
+      background: radial-gradient(circle, #fbcfe8, transparent 70%);
+      bottom: -30%; left: 20%;
+      opacity: 0.4;
+      animation: blob-3 26s ease-in-out infinite;
+    }
+    .blob-4 {
+      width: 35vw; height: 35vw;
+      background: radial-gradient(circle, #a7f3d0, transparent 70%);
+      top: 45%; left: 30%;
+      opacity: 0.35;
+      animation: blob-4 24s ease-in-out infinite;
+    }
+    @keyframes blob-1 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(15%, 10%) scale(1.1); }
+      66% { transform: translate(-5%, 20%) scale(0.95); }
+    }
+    @keyframes blob-2 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(-15%, 15%) scale(1.08); }
+      66% { transform: translate(10%, -10%) scale(0.92); }
+    }
+    @keyframes blob-3 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(20%, -15%) scale(1.15); }
+    }
+    @keyframes blob-4 {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); }
+      50% { transform: translate(-30%, -60%) scale(1.2); }
+    }
+    .grain {
+      position: absolute;
+      inset: 0;
+      opacity: 0.025;
+      mix-blend-mode: multiply;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' /%3E%3C/svg%3E");
+    }
+    .vignette {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, transparent 40%, rgba(250, 250, 249, 0.7) 95%);
+      pointer-events: none;
+    }
+
+    /* ═══════════════════════════════════════════ Container */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 36px 28px 20px;
+      padding-top: max(36px, env(safe-area-inset-top));
+      padding-bottom: max(20px, env(safe-area-inset-bottom));
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ═══════════════════════════════════════════ Brand bar (status + clock) */
+    .brand-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 11px 5px 9px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      font-size: 10.5px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--ink-muted);
+    }
+    .status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--live);
+      box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.5);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.5); }
+      50% { box-shadow: 0 0 0 6px rgba(22, 163, 74, 0); }
+    }
+    .clock {
+      font-variant-numeric: tabular-nums;
+      font-size: 10.5px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      padding: 5px 11px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .brand-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .edit-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px; height: 26px;
+      padding: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      color: var(--ink-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .edit-toggle:hover {
+      background: var(--surface-hover);
+      color: var(--ink);
+    }
+    body.edit-mode .edit-toggle {
+      background: rgba(124, 58, 237, 0.16);
+      border-color: rgba(124, 58, 237, 0.4);
+      color: #6d28d9;
+    }
+
+    /* Edit mode — tools become editable rows */
+    body.edit-mode .tool { cursor: pointer; }
+    body.edit-mode .tool:hover { background: rgba(124, 58, 237, 0.06); }
+    body.edit-mode .tool.disabled { opacity: 1; cursor: pointer; }
+    body.edit-mode .tool-arrow { display: none; }
+    body.edit-mode .tool-edit-icon { display: inline-flex; }
+    .tool-edit-icon {
+      display: none;
+      flex-shrink: 0;
+      width: 14px; height: 14px;
+      color: var(--ink-dim);
+      align-items: center;
+      justify-content: center;
+    }
+    .tool:hover .tool-edit-icon { color: #7c3aed; }
+
+    .tool-url-input {
+      display: none;
+      width: 100%;
+      margin-top: 8px;
+      padding: 7px 10px;
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      background: white;
+      font-size: 12px;
+      font-family: inherit;
+      color: var(--ink);
+      outline: none;
+    }
+    .tool-url-input:focus {
+      border-color: rgba(124, 58, 237, 0.5);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+    }
+    .tool.editing .tool-description { display: none; }
+    .tool.editing .tool-url-input { display: block; }
+    .tool.editing .tool-edit-actions { display: flex; }
+    .tool.editing .tool-edit-icon { color: #7c3aed; }
+
+    .tool-edit-actions {
+      display: none;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .tool-edit-btn {
+      font-size: 9.5px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-strong);
+      background: white;
+      cursor: pointer;
+      font-family: inherit;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      transition: all 0.15s ease;
+    }
+    .tool-edit-btn:hover { color: var(--ink); border-color: var(--ink-dim); }
+    .tool-edit-btn.save {
+      color: white;
+      background: #7c3aed;
+      border-color: #7c3aed;
+    }
+    .tool-edit-btn.save:hover { background: #6d28d9; border-color: #6d28d9; }
+
+    /* ═══════════════════════════════════════════ HUD (hero centerpiece) */
+    .hud {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 20px 0 16px;
+      padding-top: 8px;
+      opacity: 0;
+      transform: scale(0.92);
+      animation: hud-in 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s forwards;
+    }
+    @keyframes hud-in {
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .hud-stage {
+      position: relative;
+      width: 200px;
+      height: 200px;
+    }
+    .hud-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+    }
+    .hud-svg circle, .hud-svg line, .hud-svg path {
+      fill: none;
+    }
+    .hud-halo {
+      stroke: var(--hud-purple);
+      stroke-width: 1.2;
+      animation: hud-halo 2.4s ease-in-out infinite;
+    }
+    @keyframes hud-halo {
+      0%, 100% { opacity: 0.75; stroke-width: 1; }
+      50% { opacity: 0.3; stroke-width: 2.4; }
+    }
+    .hud-inner-ring { stroke: var(--hud-dim); stroke-width: 0.8; }
+    .hud-mid-arcs { stroke: var(--hud-blue); stroke-width: 1.1; stroke-linecap: round; }
+    .hud-outer-ring { stroke: var(--hud-dim); stroke-width: 0.8; }
+    .hud-ticks { stroke: rgba(0, 0, 0, 0.35); stroke-width: 1.4; stroke-linecap: round; }
+    .hud-cardinals-vert, .hud-cardinals-horz {
+      stroke: var(--hud-purple);
+      stroke-width: 2.4;
+      stroke-linecap: round;
+    }
+    .hud-cardinals-vert line, .hud-cardinals-horz line {
+      animation: cardinal-pulse 2.4s ease-in-out infinite;
+    }
+    .hud-cardinals-vert line:nth-child(2) { animation-delay: 1.2s; }
+    .hud-cardinals-horz line:nth-child(2) { animation-delay: 1.2s; }
+    @keyframes cardinal-pulse {
+      0%, 100% { opacity: 0.45; }
+      50% { opacity: 1; }
+    }
+
+    /* Scanner arcs (radar-sweep effect for liveness) */
+    .hud-scanner-1 {
+      stroke: rgba(124, 58, 237, 0.85);
+      stroke-width: 1.8;
+      filter: drop-shadow(0 0 5px rgba(124, 58, 237, 0.55));
+    }
+    .hud-scanner-2 {
+      stroke: rgba(37, 99, 235, 0.7);
+      stroke-width: 1.3;
+      filter: drop-shadow(0 0 4px rgba(37, 99, 235, 0.45));
+    }
+
+    .hud-logo {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 64px;
+      height: auto;
+      z-index: 2;
+      filter: drop-shadow(0 2px 8px rgba(124, 58, 237, 0.15));
+      animation: logo-breathe 4.5s ease-in-out infinite;
+    }
+    @keyframes logo-breathe {
+      0%, 100% { filter: drop-shadow(0 2px 8px rgba(124, 58, 237, 0.18)); }
+      50% { filter: drop-shadow(0 2px 18px rgba(124, 58, 237, 0.55)); }
+    }
+    .hud-logo-fallback {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--ink);
+      text-align: center;
+      z-index: 2;
+    }
+
+    .hud-text {
+      text-align: center;
+      margin-top: 14px;
+    }
+    .hud-greeting {
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      margin: 0 0 4px;
+    }
+    .hud-title {
+      font-size: clamp(26px, 3.4vw, 34px);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.05;
+      margin: 0;
+      background: linear-gradient(135deg, #18181b 0%, #3f3f46 60%, #71717a 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .title-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 0.8em;
+      background: linear-gradient(to bottom, #7c3aed, #2563eb);
+      vertical-align: middle;
+      margin-left: 3px;
+      animation: blink 1s steps(2) infinite;
+      transform: translateY(-3px);
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+    .hud-insight {
+      font-size: 12px;
+      color: var(--ink-muted);
+      margin: 4px 0 0;
+      min-height: 1.5em;
+      transition: opacity 0.5s ease;
+    }
+    .hud-insight.fading { opacity: 0; }
+
+    /* ═══════════════════════════════════════════ Dashboard 2×2 */
+    .dashboard {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      align-content: start;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px 18px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-card);
+      opacity: 0;
+      transform: translateY(16px);
+      animation: section-in 0.6s ease-out forwards;
+      position: relative;
+      overflow: hidden;
+      transition: box-shadow 0.3s ease, background 0.3s ease;
+    }
+    .panel:hover {
+      background: var(--surface-hover);
+      box-shadow: var(--shadow-card-hover);
+    }
+    .panel:nth-child(1) { animation-delay: 0.9s; }
+    .panel:nth-child(2) { animation-delay: 1.0s; }
+    .panel:nth-child(3) { animation-delay: 1.1s; }
+    .panel:nth-child(4) { animation-delay: 1.2s; }
+    @keyframes section-in {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .panel::after {
+      content: '';
+      position: absolute;
+      top: -30%; right: -30%;
+      width: 60%; height: 60%;
+      background: radial-gradient(circle, rgba(var(--panel-glow), 0.10), transparent 70%);
+      pointer-events: none;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 12px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .panel-logo {
+      height: 22px;
+      width: auto;
+      max-width: 120px;
+      object-fit: contain;
+      object-position: left center;
+      display: block;
+    }
+    .panel-name {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      margin-left: auto;
+    }
+
+    /* ═══════════════════════════════════════════ Tool row (2×2 grid inside each panel) */
+    .tools-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 4px;
+      align-content: start;
+    }
+    /* Lone tool spans both columns (no awkward empty cell) */
+    .tools-list .tool:only-child {
+      grid-column: 1 / -1;
+    }
+    .tool {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 11px;
+      border-radius: 10px;
+      text-decoration: none;
+      color: inherit;
+      transition: background 0.2s ease;
+      position: relative;
+      min-width: 0;
+    }
+    .tool:hover {
+      background: rgba(0, 0, 0, 0.04);
+    }
+    .tool-status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--live);
+      flex-shrink: 0;
+      box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4);
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+    .tool.disabled .tool-status-dot {
+      background: var(--ink-subtle);
+      animation: none;
+      box-shadow: none;
+    }
+    .tool-body {
+      flex: 1;
+      min-width: 0;
+    }
+    .tool-name {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+      margin: 0;
+    }
+    .tool-description {
+      font-size: 11.5px;
+      color: var(--ink-muted);
+      margin: 2px 0 0;
+      line-height: 1.3;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .tool-arrow {
+      font-size: 12px;
+      color: var(--ink-dim);
+      transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.2s ease;
+      flex-shrink: 0;
+    }
+    .tool:hover .tool-arrow {
+      transform: translate(3px, -3px);
+      color: var(--ink);
+    }
+    .tool.disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+    .tool.disabled:hover { background: transparent; }
+    .tool.disabled .tool-arrow {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 600;
+    }
+
+    /* ═══════════════════════════════════════════ Footer */
+    .footer {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      gap: 12px;
+    }
+    .footer-sync {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .footer-sync-dot {
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--live);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* ═══════════════════════════════════════════ Loader */
+    .loader {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: var(--bg-base);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.5s ease, visibility 0s linear 0.5s;
+    }
+    .loader.hidden { opacity: 0; visibility: hidden; }
+    .loader-orb {
+      position: relative;
+      width: 40px; height: 40px;
+    }
+    .loader-orb::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, #7c3aed, #2563eb, #ec4899, #14b8a6, #7c3aed);
+      animation: hud-spin-loader 1.2s linear infinite;
+    }
+    .loader-orb::after {
+      content: '';
+      position: absolute;
+      inset: 4px;
+      border-radius: 50%;
+      background: var(--bg-base);
+    }
+    @keyframes hud-spin-loader { to { transform: rotate(360deg); } }
+
+    /* ═══════════════════════════════════════════ Mobile */
+    @media (max-width: 720px) {
+      .container { padding: 16px 16px; }
+      .dashboard { grid-template-columns: 1fr; gap: 10px; }
+      .brand-bar { margin-bottom: 4px; }
+      .hud { margin: 0 0 14px; }
+      .hud-stage { width: 150px; height: 150px; }
+      .hud-logo { width: 50px; }
+      .hud-text { margin-top: 10px; }
+      .hud-greeting { font-size: 9.5px; letter-spacing: 0.28em; }
+      .hud-title { font-size: 26px; }
+      .hud-insight { font-size: 11.5px; }
+      .panel { padding: 14px; border-radius: 14px; }
+      .panel-header { padding-bottom: 10px; margin-bottom: 6px; }
+      .panel-logo { height: 18px; max-width: 100px; }
+      .tool { padding: 9px 10px; }
+      .footer { font-size: 9px; }
+      .clock { font-size: 9.5px; padding: 4px 9px; }
+      .status { font-size: 9.5px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .blob, .status-dot, .tool-status-dot, .footer-sync-dot,
+      .loader-orb::before, .title-cursor, .panel, .hud, .hud-halo {
+        animation: none !important;
+      }
+      .panel, .hud { opacity: 1; transform: none; }
+      .hud-svg animateTransform { display: none; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="loader" id="loader"><div class="loader-orb"></div></div>
+
+  <div class="bg-mesh">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="blob blob-4"></div>
+    <div class="grain"></div>
+    <div class="vignette"></div>
+  </div>
+
+  <div class="container">
+    <!-- Status pill + edit toggle + clock pill -->
+    <div class="brand-bar">
+      <div class="status">
+        <span class="status-dot"></span>
+        <span>Assistant active</span>
+      </div>
+      <div class="brand-bar-right">
+        <button class="edit-toggle" id="edit-toggle" type="button" title="Edit links" aria-label="Edit links">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        </button>
+        <div class="clock" id="clock">—</div>
+      </div>
+    </div>
+
+    <!-- HUD: animated rings + Notions Group logo at center + greeting -->
+    <div class="hud">
+      <div class="hud-stage">
+        <svg class="hud-svg" viewBox="-110 -110 220 220" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="hud-glow-grad">
+              <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.18"/>
+              <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+
+          <!-- Background subtle glow -->
+          <circle cx="0" cy="0" r="58" fill="url(#hud-glow-grad)" stroke="none"/>
+
+          <!-- Pulse halo -->
+          <circle class="hud-halo" cx="0" cy="0" r="44"/>
+
+          <!-- Inner dotted ring (rotates CW) -->
+          <circle class="hud-inner-ring" cx="0" cy="0" r="62" stroke-dasharray="0.5 5">
+            <animateTransform attributeName="transform" type="rotate"
+                              from="0" to="360" dur="20s" repeatCount="indefinite"/>
+          </circle>
+
+          <!-- Middle arcs (4 broken segments, rotates CCW) -->
+          <g class="hud-mid-arcs">
+            <path d="M -75 0 A 75 75 0 0 1 -53 -53"/>
+            <path d="M 53 -53 A 75 75 0 0 1 75 0"/>
+            <path d="M 75 0 A 75 75 0 0 1 53 53"/>
+            <path d="M -53 53 A 75 75 0 0 1 -75 0"/>
+            <animateTransform attributeName="transform" type="rotate"
+                              from="0" to="-360" dur="14s" repeatCount="indefinite"/>
+          </g>
+
+          <!-- Scanner arc 1: bright purple sweeping CW (fast — gives "alive" feel) -->
+          <circle class="hud-scanner-1" cx="0" cy="0" r="78"
+                  stroke-dasharray="55 435" stroke-linecap="round" fill="none">
+            <animate attributeName="stroke-dashoffset"
+                     from="0" to="-490" dur="3.2s"
+                     repeatCount="indefinite"/>
+          </circle>
+
+          <!-- Outer dashed ring (rotates CW) -->
+          <circle class="hud-outer-ring" cx="0" cy="0" r="90" stroke-dasharray="3 5">
+            <animateTransform attributeName="transform" type="rotate"
+                              from="0" to="360" dur="30s" repeatCount="indefinite"/>
+          </circle>
+
+          <!-- Scanner arc 2: blue sweeping CCW (slower, opposite direction for layered motion) -->
+          <circle class="hud-scanner-2" cx="0" cy="0" r="86"
+                  stroke-dasharray="40 500" stroke-linecap="round" fill="none">
+            <animate attributeName="stroke-dashoffset"
+                     from="0" to="540" dur="4.6s"
+                     repeatCount="indefinite"/>
+          </circle>
+
+          <!-- Tick marks (12 around the outer edge, rotates slow CCW) -->
+          <g class="hud-ticks">
+            <line x1="0" y1="-100" x2="0" y2="-94" transform="rotate(0)"/>
+            <line x1="0" y1="-100" x2="0" y2="-94" transform="rotate(30)"/>
+            <line x1="0" y1="-100" x2="0" y2="-94" transform="rotate(60)"/>
+            <line x1="0" y1="-100" x2="0" y2="-94" transform="rotate(90)"/>
+            <line x1="0" y1="-100" x2="0" y2="-94" transform="rotate(120)"/>
+            <line x1="0" y1="-100" x2="0" y2="-94" transform="rotate(150)"/>
+            <line x1="0" y1="-100" x2="0" y2="-94" transform="rotate(180)"/>
+            <line x1="0" y1="-100" x2="0" y2="-94" transform="rotate(210)"/>
+            <line x1="0" y1="-100" x2="0" y2="-94" transform="rotate(240)"/>
+            <line x1="0" y1="-100" x2="0" y2="-94" transform="rotate(270)"/>
+            <line x1="0" y1="-100" x2="0" y2="-94" transform="rotate(300)"/>
+            <line x1="0" y1="-100" x2="0" y2="-94" transform="rotate(330)"/>
+            <animateTransform attributeName="transform" type="rotate"
+                              from="0" to="-360" dur="60s" repeatCount="indefinite"/>
+          </g>
+
+          <!-- Cardinal accents: 2 pairs rotating in opposite directions, integrated with the ring system -->
+          <g class="hud-cardinals-vert">
+            <line x1="-4" y1="-101" x2="4" y2="-101"/>
+            <line x1="-4" y1="101" x2="4" y2="101"/>
+            <animateTransform attributeName="transform" type="rotate"
+                              from="0" to="360" dur="14s" repeatCount="indefinite"/>
+          </g>
+          <g class="hud-cardinals-horz">
+            <line x1="-101" y1="-4" x2="-101" y2="4"/>
+            <line x1="101" y1="-4" x2="101" y2="4"/>
+            <animateTransform attributeName="transform" type="rotate"
+                              from="0" to="-360" dur="18s" repeatCount="indefinite"/>
+          </g>
+        </svg>
+
+        <img class="hud-logo" src="logos/notions-group-icon.png" alt="Notions Group" />
+      </div>
+
+      <div class="hud-text">
+        <p class="hud-greeting"><span id="greeting">Welcome</span></p>
+        <h1 class="hud-title">Fernando<span class="title-cursor"></span></h1>
+        <p class="hud-insight" id="insight">Connecting to your tools</p>
+      </div>
+    </div>
+
+    <main class="dashboard" id="portal-root"></main>
+
+    <footer class="footer">
+      <span>Personal portal · Notions Group</span>
+      <span class="footer-sync">
+        <span class="footer-sync-dot"></span>
+        Synced · Live
+      </span>
+    </footer>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'portal-url-overrides'
+    let editMode = false
+
+    document.addEventListener('DOMContentLoaded', () => {
+      attachHudLogoFallback()
+      renderPortal()
+      startClock()
+      setGreeting()
+      rotateInsight()
+      document.getElementById('edit-toggle').addEventListener('click', toggleEditMode)
+      setTimeout(() => document.getElementById('loader').classList.add('hidden'), 600)
+    })
+
+    function getOverrides() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') }
+      catch { return {} }
+    }
+    function setOverride(name, url) {
+      const overrides = getOverrides()
+      if (url && url.trim()) overrides[name] = url.trim()
+      else delete overrides[name]
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(overrides))
+    }
+    function resolveUrl(tool) {
+      const overrides = getOverrides()
+      return overrides[tool.name] !== undefined ? overrides[tool.name] : tool.url
+    }
+
+    function toggleEditMode() {
+      editMode = !editMode
+      document.body.classList.toggle('edit-mode', editMode)
+      renderPortal()
+    }
+
+    function startEdit(row, input) {
+      document.querySelectorAll('.tool.editing').forEach((r) => {
+        if (r !== row) r.classList.remove('editing')
+      })
+      row.classList.add('editing')
+      setTimeout(() => { input.focus(); input.select() }, 0)
+    }
+    function cancelEdit(row) {
+      row.classList.remove('editing')
+    }
+    function commitEdit(row, tool, url) {
+      setOverride(tool.name, url)
+      row.classList.remove('editing')
+      renderPortal()
+    }
+
+    function attachHudLogoFallback() {
+      const logo = document.querySelector('.hud-logo')
+      if (!logo) return
+      logo.addEventListener('error', () => {
+        const fallback = document.createElement('span')
+        fallback.className = 'hud-logo-fallback'
+        fallback.textContent = 'NOTIONS GROUP'
+        logo.replaceWith(fallback)
+      })
+    }
+
+    function renderPortal() {
+      const root = document.getElementById('portal-root')
+      root.innerHTML = ''
+
+      PORTAL.forEach((section) => {
+        const panel = document.createElement('section')
+        panel.className = 'panel'
+        panel.style.setProperty('--panel-glow', section.glow)
+
+        const header = document.createElement('div')
+        header.className = 'panel-header'
+
+        const logo = document.createElement('img')
+        logo.className = 'panel-logo'
+        logo.src = section.logo
+        logo.alt = section.company
+        logo.addEventListener('error', () => {
+          const fallback = document.createElement('span')
+          fallback.style.cssText = 'font-weight:700;color:#18181b;font-size:13px;letter-spacing:0.04em'
+          fallback.textContent = section.company
+          logo.replaceWith(fallback)
+        })
+        header.appendChild(logo)
+
+        const name = document.createElement('span')
+        name.className = 'panel-name'
+        name.textContent = section.company
+        header.appendChild(name)
+        panel.appendChild(header)
+
+        const list = document.createElement('div')
+        list.className = 'tools-list'
+
+        section.tools.forEach((tool) => {
+          const currentUrl = resolveUrl(tool)
+          const hasUrl = currentUrl && currentUrl.trim() !== ''
+
+          const row = document.createElement(editMode ? 'div' : (hasUrl ? 'a' : 'div'))
+          row.className = 'tool' + (hasUrl ? '' : ' disabled')
+          if (!editMode && hasUrl) {
+            row.href = currentUrl
+            row.target = '_blank'
+            row.rel = 'noopener noreferrer'
+          }
+
+          const dot = document.createElement('span')
+          dot.className = 'tool-status-dot'
+          row.appendChild(dot)
+
+          const body = document.createElement('div')
+          body.className = 'tool-body'
+
+          const toolName = document.createElement('p')
+          toolName.className = 'tool-name'
+          toolName.textContent = tool.name
+          body.appendChild(toolName)
+
+          const toolDesc = document.createElement('p')
+          toolDesc.className = 'tool-description'
+          toolDesc.textContent = tool.description
+          body.appendChild(toolDesc)
+
+          const input = document.createElement('input')
+          input.className = 'tool-url-input'
+          input.type = 'url'
+          input.placeholder = 'https://...'
+          input.value = currentUrl || ''
+          input.addEventListener('click', (e) => e.stopPropagation())
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); commitEdit(row, tool, input.value) }
+            if (e.key === 'Escape') { e.preventDefault(); cancelEdit(row) }
+          })
+          body.appendChild(input)
+
+          const actions = document.createElement('div')
+          actions.className = 'tool-edit-actions'
+          const saveBtn = document.createElement('button')
+          saveBtn.type = 'button'
+          saveBtn.className = 'tool-edit-btn save'
+          saveBtn.textContent = 'Save'
+          saveBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); e.preventDefault()
+            commitEdit(row, tool, input.value)
+          })
+          const cancelBtn = document.createElement('button')
+          cancelBtn.type = 'button'
+          cancelBtn.className = 'tool-edit-btn'
+          cancelBtn.textContent = 'Cancel'
+          cancelBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); e.preventDefault()
+            cancelEdit(row)
+          })
+          actions.appendChild(saveBtn)
+          actions.appendChild(cancelBtn)
+          body.appendChild(actions)
+
+          row.appendChild(body)
+
+          const editIcon = document.createElement('span')
+          editIcon.className = 'tool-edit-icon'
+          editIcon.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>'
+          row.appendChild(editIcon)
+
+          const arrow = document.createElement('span')
+          arrow.className = 'tool-arrow'
+          arrow.textContent = hasUrl ? '↗' : 'pending'
+          row.appendChild(arrow)
+
+          if (editMode) {
+            row.addEventListener('click', (e) => {
+              if (e.target.closest('input, button')) return
+              startEdit(row, input)
+            })
+          }
+
+          list.appendChild(row)
+        })
+
+        panel.appendChild(list)
+        root.appendChild(panel)
+      })
+    }
+
+    function setGreeting() {
+      const h = new Date().getHours()
+      const greeting = h < 6 ? 'Late night'
+                     : h < 12 ? 'Good morning'
+                     : h < 18 ? 'Good afternoon'
+                     : 'Good evening'
+      document.getElementById('greeting').textContent = greeting
+    }
+
+    function startClock() {
+      const el = document.getElementById('clock')
+      const tick = () => {
+        const now = new Date()
+        const time = now.toLocaleTimeString('en-US', {
+          hour: '2-digit', minute: '2-digit', hour12: false,
+        })
+        const date = now.toLocaleDateString('en-US', {
+          weekday: 'short', day: 'numeric', month: 'short',
+        })
+        el.textContent = `${date} · ${time}`
+      }
+      tick()
+      setInterval(tick, 30000)
+    }
+
+    function rotateInsight() {
+      const el = document.getElementById('insight')
+      let i = 0
+      setInterval(() => {
+        el.classList.add('fading')
+        setTimeout(() => {
+          i = (i + 1) % INSIGHTS.length
+          el.textContent = INSIGHTS[i]
+          el.classList.remove('fading')
+        }, 500)
+      }, 6500)
+    }
+  </script>
+</body>
+</html>
