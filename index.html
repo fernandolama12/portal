@@ -274,6 +274,138 @@
       color: #6d28d9;
     }
 
+    .logout-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px; height: 26px;
+      padding: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      color: var(--ink-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .logout-btn:hover {
+      background: var(--surface-hover);
+      color: #dc2626;
+      border-color: rgba(220, 38, 38, 0.3);
+    }
+
+    /* ═══════════════════════════════════════════ Auth gate */
+    .auth-gate {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: var(--bg-base);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      padding-top: max(20px, env(safe-area-inset-top));
+      padding-bottom: max(20px, env(safe-area-inset-bottom));
+    }
+    .auth-gate.hidden { display: none; }
+    .auth-card {
+      position: relative;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 36px 32px 28px;
+      width: 100%;
+      max-width: 340px;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 16px 48px rgba(0, 0, 0, 0.08);
+      text-align: center;
+      animation: auth-card-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    @keyframes auth-card-in {
+      from { opacity: 0; transform: translateY(20px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .auth-card.shake { animation: auth-shake 0.45s ease-in-out; }
+    @keyframes auth-shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+    .auth-logo {
+      width: 52px;
+      height: auto;
+      margin: 0 auto 14px;
+      display: block;
+      filter: drop-shadow(0 2px 8px rgba(124, 58, 237, 0.18));
+      animation: logo-breathe 4.5s ease-in-out infinite;
+    }
+    .auth-title {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0;
+      background: linear-gradient(135deg, #18181b 0%, #52525b 80%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .auth-subtitle {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      margin: 4px 0 24px;
+    }
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+    .auth-input {
+      width: 100%;
+      padding: 11px 13px;
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      background: white;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .auth-input:focus {
+      border-color: rgba(124, 58, 237, 0.5);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+    }
+    .auth-btn {
+      margin-top: 6px;
+      padding: 11px 16px;
+      border: none;
+      border-radius: 10px;
+      background: #18181b;
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.15s ease;
+    }
+    .auth-btn:hover { background: #3f3f46; }
+    .auth-btn:active { transform: scale(0.98); }
+    .auth-error {
+      font-size: 11.5px;
+      color: #dc2626;
+      min-height: 1.2em;
+      margin-top: 2px;
+      font-weight: 500;
+    }
+
     /* Edit mode — tools become editable rows */
     body.edit-mode .tool { cursor: pointer; }
     body.edit-mode .tool:hover { background: rgba(124, 58, 237, 0.06); }
@@ -725,6 +857,21 @@
 <body>
   <div class="loader" id="loader"><div class="loader-orb"></div></div>
 
+  <!-- Auth gate (covers everything until unlocked) -->
+  <div class="auth-gate hidden" id="auth-gate">
+    <div class="auth-card" id="auth-card">
+      <img src="logos/notions-group-icon.png" alt="Notions Group" class="auth-logo" />
+      <h1 class="auth-title">Portal</h1>
+      <p class="auth-subtitle">Notions Group</p>
+      <form class="auth-form" id="auth-form">
+        <input type="text" class="auth-input" id="auth-name" placeholder="Your name" autocomplete="off" required />
+        <input type="password" class="auth-input" id="auth-pwd" placeholder="Password" autocomplete="off" required />
+        <button type="submit" class="auth-btn">Enter</button>
+        <div class="auth-error" id="auth-error"></div>
+      </form>
+    </div>
+  </div>
+
   <div class="bg-mesh">
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
@@ -746,6 +893,13 @@
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        </button>
+        <button class="logout-btn" id="logout-btn" type="button" title="Logout" aria-label="Logout">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
           </svg>
         </button>
         <div class="clock" id="clock">—</div>
@@ -845,7 +999,7 @@
 
       <div class="hud-text">
         <p class="hud-greeting"><span id="greeting">Welcome</span></p>
-        <h1 class="hud-title">Fernando<span class="title-cursor"></span></h1>
+        <h1 class="hud-title"><span id="user-name">Fernando</span><span class="title-cursor"></span></h1>
         <p class="hud-insight" id="insight">Connecting to your tools</p>
       </div>
     </div>
@@ -862,18 +1016,94 @@
   </div>
 
   <script>
+    // ═══════════════════════════════════════════════════════════════════
+    //  CONFIG — edit these constants
+    //  AUTH_PASSWORD: shared team password (anyone with the URL needs this to enter)
+    //  AUTH_VERSION:  bump this string (e.g. 'v1' → 'v2') to force everyone to re-login
+    // ═══════════════════════════════════════════════════════════════════
+    const AUTH_PASSWORD = 'portal2026'
+    const AUTH_VERSION = 'v1'
+
     const STORAGE_KEY = 'portal-url-overrides'
+    const AUTH_KEY = 'portal-auth'
     let editMode = false
 
     document.addEventListener('DOMContentLoaded', () => {
+      const auth = getAuth()
+      if (auth && auth.unlocked) {
+        // Already authenticated → skip gate, load portal
+        document.getElementById('auth-gate').classList.add('hidden')
+        initPortal(auth.name)
+      } else {
+        // Not authenticated → hide loader immediately, show gate
+        document.getElementById('loader').classList.add('hidden')
+        document.getElementById('auth-gate').classList.remove('hidden')
+        setupAuthForm()
+        setTimeout(() => document.getElementById('auth-name').focus(), 100)
+      }
+    })
+
+    function initPortal(userName) {
+      const firstName = (userName || 'Welcome').trim().split(/\s+/)[0]
+      document.getElementById('user-name').textContent = firstName
       attachHudLogoFallback()
       renderPortal()
       startClock()
       setGreeting()
       rotateInsight()
       document.getElementById('edit-toggle').addEventListener('click', toggleEditMode)
+      document.getElementById('logout-btn').addEventListener('click', logout)
       setTimeout(() => document.getElementById('loader').classList.add('hidden'), 600)
-    })
+    }
+
+    // ─────────────────────────────────────────── Auth helpers
+    function getAuth() {
+      try {
+        const stored = JSON.parse(localStorage.getItem(AUTH_KEY) || 'null')
+        if (!stored || stored.version !== AUTH_VERSION) return null
+        return stored
+      } catch { return null }
+    }
+    function setAuth(name) {
+      localStorage.setItem(AUTH_KEY, JSON.stringify({
+        version: AUTH_VERSION,
+        name: name,
+        unlocked: true,
+      }))
+    }
+    function logout() {
+      localStorage.removeItem(AUTH_KEY)
+      window.location.reload()
+    }
+    function setupAuthForm() {
+      const form = document.getElementById('auth-form')
+      const nameInput = document.getElementById('auth-name')
+      const pwdInput = document.getElementById('auth-pwd')
+      const errorEl = document.getElementById('auth-error')
+      const card = document.getElementById('auth-card')
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault()
+        const name = nameInput.value.trim()
+        const pwd = pwdInput.value
+        if (!name) {
+          errorEl.textContent = 'Enter your name'
+          return
+        }
+        if (pwd === AUTH_PASSWORD) {
+          setAuth(name)
+          document.getElementById('auth-gate').classList.add('hidden')
+          initPortal(name)
+        } else {
+          card.classList.remove('shake')
+          void card.offsetWidth   // trigger reflow so animation re-runs
+          card.classList.add('shake')
+          errorEl.textContent = 'Wrong password'
+          pwdInput.value = ''
+          pwdInput.focus()
+        }
+      })
+    }
 
     function getOverrides() {
       try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') }
