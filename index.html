@@ -611,6 +611,62 @@
     }
     .hud-insight.fading { opacity: 0; }
 
+    /* ═══════════════════════════════════════════ Search bar (Google) */
+    .search-form {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      max-width: 720px;
+      margin: 22px auto 6px auto;
+      padding: 14px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-card);
+      opacity: 0;
+      transform: translateY(16px);
+      animation: section-in 0.6s ease-out forwards;
+      transition: box-shadow 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+    }
+    .search-form:focus-within {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+      box-shadow: var(--shadow-card-hover);
+    }
+    .search-icon {
+      width: 18px;
+      height: 18px;
+      color: var(--ink-dim);
+      flex-shrink: 0;
+    }
+    .search-input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      outline: none;
+      font-family: inherit;
+      font-size: 15px;
+      color: var(--ink);
+      caret-color: var(--ink);
+    }
+    .search-input::placeholder {
+      color: var(--ink-dim);
+    }
+    .search-hint {
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      padding: 3px 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
     /* ═══════════════════════════════════════════ Dashboard 2×2 */
     .dashboard {
       flex: 1;
@@ -826,6 +882,9 @@
     @media (max-width: 720px) {
       .container { padding: 16px 16px; }
       .dashboard { grid-template-columns: 1fr; gap: 10px; }
+      .search-form { padding: 12px 14px; margin-bottom: 16px; border-radius: 14px; }
+      .search-input { font-size: 14px; }
+      .search-hint { display: none; }
       .brand-bar { margin-bottom: 4px; }
       .hud { margin: 0 0 14px; }
       .hud-stage { width: 150px; height: 150px; }
@@ -1006,6 +1065,27 @@
 
     <main class="dashboard" id="portal-root"></main>
 
+    <form class="search-form" id="google-search" action="https://www.google.com/search" method="GET" role="search" autocomplete="off">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input
+        class="search-input"
+        id="search-input"
+        type="search"
+        name="q"
+        placeholder="Buscar en Google…"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+        enterkeyhint="search"
+        aria-label="Buscar en Google"
+      />
+      <span class="search-hint">⏎</span>
+    </form>
+
     <footer class="footer">
       <span>Personal portal · Notions Group</span>
       <span class="footer-sync">
@@ -1054,6 +1134,12 @@
       document.getElementById('edit-toggle').addEventListener('click', toggleEditMode)
       document.getElementById('logout-btn').addEventListener('click', logout)
       setTimeout(() => document.getElementById('loader').classList.add('hidden'), 600)
+      // Auto-focus the Google search bar so opening a new tab → type → Enter
+      // works with zero clicks. Wait for the loader fade so scroll doesn't jump.
+      setTimeout(() => {
+        const s = document.getElementById('search-input')
+        if (s) s.focus({ preventScroll: true })
+      }, 700)
     }
 
     // ─────────────────────────────────────────── Auth helpers
