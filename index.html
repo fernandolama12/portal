@@ -50,6 +50,7 @@
         logo: 'logos/printpilot.png',
         glow: '14, 165, 233',
         tools: [
+          { name: 'Store', description: 'Tienda online · printpilot.store', url: 'https://printpilot.store' },
           { name: 'PP NowTrack', description: 'Logistics tracking for Print Pilot', url: 'https://stage-printpilot.nowtrack.com.do' },
           { name: 'PPC', description: 'PrintFlow Customizer', url: 'https://printpilot.store' },
           { name: 'PPQ', description: 'PrintPilot Quotes', url: 'https://ppq.printpilot.store' },
@@ -443,6 +444,91 @@
     .tool.editing .tool-url-input { display: block; }
     .tool.editing .tool-edit-actions { display: flex; }
     .tool.editing .tool-edit-icon { color: #7c3aed; }
+
+    /* "+ Add link" button at the end of each panel — only in edit mode */
+    .tool-add-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      margin-top: 6px;
+      padding: 10px 12px;
+      background: transparent;
+      border: 1.5px dashed rgba(0, 0, 0, 0.18);
+      border-radius: 10px;
+      color: rgba(0, 0, 0, 0.55);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .tool-add-btn:hover {
+      border-color: rgba(124, 58, 237, 0.5);
+      color: #7c3aed;
+      background: rgba(124, 58, 237, 0.04);
+    }
+    .tool-add-icon {
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 1;
+    }
+
+    /* Up/down reorder controls — only in edit mode */
+    .tool-reorder {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 1px;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+    .tool-reorder-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 14px;
+      padding: 0;
+      background: transparent;
+      border: none;
+      color: rgba(0, 0, 0, 0.35);
+      font-size: 9px;
+      line-height: 1;
+      cursor: pointer;
+      transition: color 0.12s ease;
+    }
+    .tool-reorder-btn:hover:not(:disabled) {
+      color: #7c3aed;
+    }
+    .tool-reorder-btn:disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+    }
+
+    /* "X" delete button on custom tools — only in edit mode */
+    .tool-delete-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      margin-left: 6px;
+      padding: 0;
+      background: transparent;
+      border: 1px solid rgba(0, 0, 0, 0.10);
+      border-radius: 50%;
+      color: rgba(0, 0, 0, 0.55);
+      cursor: pointer;
+      transition: all 0.12s ease;
+      flex-shrink: 0;
+    }
+    .tool-delete-btn:hover {
+      background: rgba(220, 38, 38, 0.08);
+      border-color: rgba(220, 38, 38, 0.4);
+      color: #dc2626;
+    }
 
     .tool-edit-actions {
       display: none;
@@ -1105,6 +1191,8 @@
     const AUTH_VERSION = 'v1'
 
     const STORAGE_KEY = 'portal-url-overrides'
+    const CUSTOM_TOOLS_KEY = 'portal-custom-tools'
+    const TOOL_ORDER_KEY = 'portal-tool-order'
     const AUTH_KEY = 'portal-auth'
     let editMode = false
 
@@ -1206,6 +1294,81 @@
       return overrides[tool.name] !== undefined ? overrides[tool.name] : tool.url
     }
 
+    // ─── Custom tools (per-device, stored in localStorage) ───
+    // Shape: { [company]: [{ id, name, description, url }] }
+    function getCustomTools() {
+      try { return JSON.parse(localStorage.getItem(CUSTOM_TOOLS_KEY) || '{}') }
+      catch { return {} }
+    }
+    function saveCustomTools(all) {
+      localStorage.setItem(CUSTOM_TOOLS_KEY, JSON.stringify(all))
+    }
+    function addCustomTool(company) {
+      const name = prompt('Nombre del link (ej. "Analytics"):')
+      if (!name || !name.trim()) return
+      const url = prompt('URL (https://...):')
+      if (!url || !url.trim()) return
+      const description = prompt('Descripción corta (opcional):') || ''
+      const all = getCustomTools()
+      all[company] = all[company] || []
+      all[company].push({
+        id: 'c-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+        name: name.trim(),
+        description: description.trim(),
+        url: url.trim(),
+        custom: true,
+      })
+      saveCustomTools(all)
+      renderPortal()
+    }
+    function removeCustomTool(company, id) {
+      if (!confirm('¿Borrar este link?')) return
+      const all = getCustomTools()
+      if (!all[company]) return
+      all[company] = all[company].filter((t) => t.id !== id)
+      if (all[company].length === 0) delete all[company]
+      saveCustomTools(all)
+      renderPortal()
+    }
+
+    // ─── Per-section tool ordering (persisted, per-device) ───
+    // A tool "key" is either "h:<name>" for hardcoded PORTAL tools or "c:<id>"
+    // for custom ones — stable across renders, and unique across both sources.
+    function getToolOrder() {
+      try { return JSON.parse(localStorage.getItem(TOOL_ORDER_KEY) || '{}') }
+      catch { return {} }
+    }
+    function saveToolOrder(all) {
+      localStorage.setItem(TOOL_ORDER_KEY, JSON.stringify(all))
+    }
+    function toolKey(tool) {
+      return tool.custom ? ('c:' + tool.id) : ('h:' + tool.name)
+    }
+    function applyOrder(tools, savedOrder) {
+      if (!savedOrder || !savedOrder.length) return tools
+      const byKey = new Map(tools.map((t) => [toolKey(t), t]))
+      const ordered = []
+      const seen = new Set()
+      for (const k of savedOrder) {
+        if (byKey.has(k) && !seen.has(k)) { ordered.push(byKey.get(k)); seen.add(k) }
+      }
+      // Append tools not in the saved order (e.g. newly added hardcoded ones).
+      for (const t of tools) {
+        if (!seen.has(toolKey(t))) ordered.push(t)
+      }
+      return ordered
+    }
+    function moveTool(company, orderedList, from, direction) {
+      const to = from + direction
+      if (to < 0 || to >= orderedList.length) return
+      const keys = orderedList.map(toolKey)
+      ;[keys[from], keys[to]] = [keys[to], keys[from]]
+      const orders = getToolOrder()
+      orders[company] = keys
+      saveToolOrder(orders)
+      renderPortal()
+    }
+
     function toggleEditMode() {
       editMode = !editMode
       document.body.classList.toggle('edit-mode', editMode)
@@ -1272,7 +1435,15 @@
         const list = document.createElement('div')
         list.className = 'tools-list'
 
-        section.tools.forEach((tool) => {
+        // Combine hardcoded tools with per-device custom tools for this section,
+        // then apply the saved per-section order.
+        const customTools = getCustomTools()[section.company] || []
+        const allTools = applyOrder(
+          section.tools.concat(customTools),
+          getToolOrder()[section.company]
+        )
+
+        allTools.forEach((tool, toolIdx) => {
           const currentUrl = resolveUrl(tool)
           const hasUrl = currentUrl && currentUrl.trim() !== ''
 
@@ -1282,6 +1453,37 @@
             row.href = currentUrl
             row.target = '_blank'
             row.rel = 'noopener noreferrer'
+          }
+
+          // Reorder controls (edit mode only) — up/down arrows before the dot.
+          if (editMode) {
+            const reorder = document.createElement('div')
+            reorder.className = 'tool-reorder'
+            const upBtn = document.createElement('button')
+            upBtn.type = 'button'
+            upBtn.className = 'tool-reorder-btn'
+            upBtn.title = 'Mover arriba'
+            upBtn.setAttribute('aria-label', 'Mover arriba')
+            upBtn.disabled = toolIdx === 0
+            upBtn.textContent = '▲'
+            upBtn.addEventListener('click', (e) => {
+              e.stopPropagation(); e.preventDefault()
+              moveTool(section.company, allTools, toolIdx, -1)
+            })
+            const downBtn = document.createElement('button')
+            downBtn.type = 'button'
+            downBtn.className = 'tool-reorder-btn'
+            downBtn.title = 'Mover abajo'
+            downBtn.setAttribute('aria-label', 'Mover abajo')
+            downBtn.disabled = toolIdx === allTools.length - 1
+            downBtn.textContent = '▼'
+            downBtn.addEventListener('click', (e) => {
+              e.stopPropagation(); e.preventDefault()
+              moveTool(section.company, allTools, toolIdx, +1)
+            })
+            reorder.appendChild(upBtn)
+            reorder.appendChild(downBtn)
+            row.appendChild(reorder)
           }
 
           const dot = document.createElement('span')
@@ -1354,8 +1556,33 @@
             })
           }
 
+          // Delete button for custom tools (only visible in edit mode).
+          if (tool.custom && editMode) {
+            const delBtn = document.createElement('button')
+            delBtn.type = 'button'
+            delBtn.className = 'tool-delete-btn'
+            delBtn.title = 'Borrar link'
+            delBtn.setAttribute('aria-label', 'Borrar link')
+            delBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
+            delBtn.addEventListener('click', (e) => {
+              e.stopPropagation(); e.preventDefault()
+              removeCustomTool(section.company, tool.id)
+            })
+            row.appendChild(delBtn)
+          }
+
           list.appendChild(row)
         })
+
+        // "+ Add link" button at the end of each panel — only in edit mode.
+        if (editMode) {
+          const addBtn = document.createElement('button')
+          addBtn.type = 'button'
+          addBtn.className = 'tool-add-btn'
+          addBtn.innerHTML = '<span class="tool-add-icon">+</span><span>Add link</span>'
+          addBtn.addEventListener('click', () => addCustomTool(section.company))
+          list.appendChild(addBtn)
+        }
 
         panel.appendChild(list)
         root.appendChild(panel)
