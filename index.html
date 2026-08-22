@@ -275,6 +275,173 @@
       color: #6d28d9;
     }
 
+    .sync-btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px; height: 26px;
+      padding: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      color: var(--ink-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .sync-btn:hover { background: var(--surface-hover); color: var(--ink); }
+    .sync-dot {
+      position: absolute;
+      bottom: 1px; right: 1px;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--ink-dim);
+      border: 1.5px solid var(--bg-base);
+      transition: background 0.2s ease;
+    }
+    .sync-btn[data-status="synced"] .sync-dot { background: var(--live); }
+    .sync-btn[data-status="syncing"] .sync-dot { background: #f59e0b; animation: sync-pulse 1s infinite; }
+    .sync-btn[data-status="error"] .sync-dot { background: #dc2626; }
+    .sync-btn[data-status="none"] .sync-dot { background: var(--ink-dim); }
+    @keyframes sync-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+    /* Sync modal */
+    .sync-modal.hidden { display: none; }
+    .sync-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .sync-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(24, 24, 27, 0.55);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+    .sync-card {
+      position: relative;
+      background: white;
+      border-radius: 16px;
+      max-width: 460px;
+      width: 100%;
+      padding: 28px 24px 22px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .sync-close {
+      position: absolute;
+      top: 10px; right: 12px;
+      width: 30px; height: 30px;
+      display: flex; align-items: center; justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: 50%;
+      font-size: 22px;
+      color: var(--ink-muted);
+      cursor: pointer;
+      line-height: 1;
+    }
+    .sync-close:hover { background: var(--bg-tint); color: var(--ink); }
+    .sync-title {
+      margin: 0 0 6px;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .sync-subtitle {
+      margin: 0 0 14px;
+      font-size: 12px;
+      color: var(--ink-muted);
+      line-height: 1.55;
+    }
+    .sync-status-panel {
+      display: none;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+      border-radius: 10px;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .sync-status-panel.show { display: block; }
+    .sync-status-panel.status-synced { background: rgba(22, 163, 74, 0.08); color: #15803d; border: 1px solid rgba(22, 163, 74, 0.25); }
+    .sync-status-panel.status-error { background: rgba(220, 38, 38, 0.06); color: #b91c1c; border: 1px solid rgba(220, 38, 38, 0.2); }
+    .sync-help {
+      background: var(--bg-tint);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 12px;
+      color: var(--ink-muted);
+      margin-bottom: 14px;
+    }
+    .sync-help p { margin: 0 0 6px; color: var(--ink); }
+    .sync-help ol { margin: 0; padding-left: 18px; line-height: 1.6; }
+    .sync-help a { color: #7c3aed; text-decoration: none; font-weight: 600; }
+    .sync-help a:hover { text-decoration: underline; }
+    .sync-help code { background: white; padding: 1px 6px; border-radius: 4px; border: 1px solid var(--border); font-size: 11px; }
+    .sync-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      background: white;
+      font-family: monospace;
+      font-size: 12px;
+      color: var(--ink);
+      outline: none;
+      margin-bottom: 12px;
+    }
+    .sync-input:focus {
+      border-color: rgba(124, 58, 237, 0.5);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+    }
+    .sync-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .sync-action-btn {
+      flex: 1;
+      min-width: 100px;
+      padding: 9px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-strong);
+      background: white;
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .sync-action-btn:hover { border-color: var(--ink-dim); }
+    .sync-action-btn.primary {
+      background: #7c3aed;
+      color: white;
+      border-color: #7c3aed;
+    }
+    .sync-action-btn.primary:hover { background: #6d28d9; border-color: #6d28d9; }
+    .sync-action-btn.danger {
+      background: white;
+      color: #b91c1c;
+      border-color: rgba(220, 38, 38, 0.4);
+    }
+    .sync-action-btn.danger:hover { background: rgba(220, 38, 38, 0.05); }
+    .sync-action-btn.hidden { display: none; }
+    .sync-error {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #b91c1c;
+      min-height: 16px;
+    }
+
     .logout-btn {
       display: inline-flex;
       align-items: center;
@@ -1035,6 +1202,35 @@
     </div>
   </div>
 
+  <!-- Sync setup modal — opens from the sync button in the header. -->
+  <div class="sync-modal hidden" id="sync-modal">
+    <div class="sync-backdrop" id="sync-backdrop"></div>
+    <div class="sync-card">
+      <button class="sync-close" id="sync-close" type="button" aria-label="Close">×</button>
+      <h2 class="sync-title">Sync across devices</h2>
+      <p class="sync-subtitle" id="sync-subtitle">
+        Save your links, edits, and order in a private GitHub Gist so every device sees the same portal.
+      </p>
+      <div class="sync-status-panel" id="sync-status-panel"></div>
+      <div class="sync-help">
+        <p><strong>How to get a token:</strong></p>
+        <ol>
+          <li>Open <a href="https://github.com/settings/tokens/new?description=Portal%20Sync&scopes=gist" target="_blank" rel="noopener">github.com/settings/tokens/new</a></li>
+          <li>Only the <code>gist</code> scope is needed — nothing else.</li>
+          <li>Set expiration to <em>No expiration</em> (or long).</li>
+          <li>Click <em>Generate token</em>, copy it, and paste it below.</li>
+        </ol>
+      </div>
+      <input type="password" class="sync-input" id="sync-token-input" placeholder="ghp_... or github_pat_..." autocomplete="off" />
+      <div class="sync-actions">
+        <button class="sync-action-btn primary" id="sync-save-btn" type="button">Save &amp; sync</button>
+        <button class="sync-action-btn danger hidden" id="sync-disconnect-btn" type="button">Disconnect</button>
+        <button class="sync-action-btn" id="sync-cancel-btn" type="button">Cancel</button>
+      </div>
+      <div class="sync-error" id="sync-error"></div>
+    </div>
+  </div>
+
   <div class="bg-mesh">
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
@@ -1057,6 +1253,14 @@
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
           </svg>
+        </button>
+        <button class="sync-btn" id="sync-btn" type="button" title="Sync across devices" aria-label="Sync">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"/>
+            <polyline points="1 20 1 14 7 14"/>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          </svg>
+          <span class="sync-dot" id="sync-dot"></span>
         </button>
         <button class="logout-btn" id="logout-btn" type="button" title="Logout" aria-label="Logout">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1233,12 +1437,30 @@
       const firstName = (userName || 'Welcome').trim().split(/\s+/)[0]
       document.getElementById('user-name').textContent = firstName
       attachHudLogoFallback()
+      // If sync is configured, pull first so the initial render already
+      // reflects whatever the other devices left behind. Fire-and-forget:
+      // don't block the first paint — renderPortal() re-runs after pull.
+      if (getSyncToken()) {
+        setSyncStatus('syncing')
+        syncPull().then(() => renderPortal())
+      } else {
+        setSyncStatus('none')
+      }
       renderPortal()
       startClock()
       setGreeting()
       rotateInsight()
       document.getElementById('edit-toggle').addEventListener('click', toggleEditMode)
       document.getElementById('logout-btn').addEventListener('click', logout)
+      document.getElementById('sync-btn').addEventListener('click', openSyncModal)
+      document.getElementById('sync-close').addEventListener('click', closeSyncModal)
+      document.getElementById('sync-backdrop').addEventListener('click', closeSyncModal)
+      document.getElementById('sync-cancel-btn').addEventListener('click', closeSyncModal)
+      document.getElementById('sync-save-btn').addEventListener('click', submitSyncToken)
+      document.getElementById('sync-disconnect-btn').addEventListener('click', disconnectSync)
+      document.getElementById('sync-token-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); submitSyncToken() }
+      })
       setTimeout(() => document.getElementById('loader').classList.add('hidden'), 600)
       // Auto-focus the Google search bar so opening a new tab → type → Enter
       // works with zero clicks. Wait for the loader fade so scroll doesn't jump.
@@ -1325,6 +1547,7 @@
       if (Object.keys(current).length === 0) delete overrides[origName]
       else overrides[origName] = current
       localStorage.setItem(STORAGE_KEY, JSON.stringify(overrides))
+      if (typeof syncPushDebounced === 'function') syncPushDebounced()
     }
     function resolveTool(tool) {
       // Attach _origName so ordering keys and override lookups stay stable
@@ -1355,6 +1578,7 @@
     }
     function saveCustomTools(all) {
       localStorage.setItem(CUSTOM_TOOLS_KEY, JSON.stringify(all))
+      if (typeof syncPushDebounced === 'function') syncPushDebounced()
     }
     function addCustomTool(company) {
       const name = prompt('Nombre del link (ej. "Analytics"):')
@@ -1394,6 +1618,201 @@
       saveCustomTools(all)
     }
 
+    // ═══════════════════════════════════════════════════════════════════
+    //  Cross-device sync — via a private GitHub Gist owned by the user.
+    //  The user pastes a Personal Access Token with the `gist` scope. The
+    //  portal finds (or creates) a private gist named GIST_DESCRIPTION and
+    //  mirrors overrides + custom tools + tool order there. Every save
+    //  triggers a debounced push; every login triggers a pull that
+    //  overwrites local state with whatever the gist holds (last-write-wins).
+    // ═══════════════════════════════════════════════════════════════════
+    const SYNC_TOKEN_KEY = 'portal-sync-token'
+    const SYNC_GIST_ID_KEY = 'portal-sync-gist-id'
+    const SYNC_STATE_VERSION = 1
+    const GIST_DESCRIPTION = 'Portal · Fernando · sync state (do not delete)'
+    const GIST_FILENAME = 'portal-state.json'
+
+    let suppressSync = false
+    let syncPushTimer = null
+    let currentSyncStatus = 'none' // none | syncing | synced | error
+
+    function getSyncToken() { return localStorage.getItem(SYNC_TOKEN_KEY) }
+    function setSyncToken(t) { localStorage.setItem(SYNC_TOKEN_KEY, t) }
+    function clearSyncCreds() {
+      localStorage.removeItem(SYNC_TOKEN_KEY)
+      localStorage.removeItem(SYNC_GIST_ID_KEY)
+    }
+    function getSyncGistId() { return localStorage.getItem(SYNC_GIST_ID_KEY) }
+    function setSyncGistId(id) { localStorage.setItem(SYNC_GIST_ID_KEY, id) }
+
+    function setSyncStatus(status) {
+      currentSyncStatus = status
+      const btn = document.getElementById('sync-btn')
+      if (btn) btn.setAttribute('data-status', status)
+    }
+
+    function collectLocalState() {
+      return {
+        version: SYNC_STATE_VERSION,
+        updatedAt: new Date().toISOString(),
+        overrides: getOverrides(),
+        customTools: getCustomTools(),
+        toolOrder: getToolOrder(),
+      }
+    }
+
+    function applyRemoteState(state) {
+      if (!state || state.version !== SYNC_STATE_VERSION) return false
+      suppressSync = true
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state.overrides || {}))
+        localStorage.setItem(CUSTOM_TOOLS_KEY, JSON.stringify(state.customTools || {}))
+        localStorage.setItem(TOOL_ORDER_KEY, JSON.stringify(state.toolOrder || {}))
+      } finally {
+        suppressSync = false
+      }
+      return true
+    }
+
+    async function ghFetch(url, opts = {}) {
+      const token = getSyncToken()
+      if (!token) throw new Error('no-token')
+      const resp = await fetch(url, {
+        ...opts,
+        headers: {
+          Authorization: 'Bearer ' + token,
+          Accept: 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28',
+          ...(opts.body ? { 'Content-Type': 'application/json' } : {}),
+          ...(opts.headers || {}),
+        },
+      })
+      if (resp.status === 401) throw new Error('bad-token')
+      if (!resp.ok) throw new Error('http-' + resp.status)
+      return resp
+    }
+
+    async function findOrCreateGist() {
+      // Look for a previous portal-sync gist so we don't create duplicates.
+      const listResp = await ghFetch('https://api.github.com/gists?per_page=100')
+      const gists = await listResp.json()
+      const existing = gists.find((g) => g.description === GIST_DESCRIPTION)
+      if (existing) return existing.id
+      const createResp = await ghFetch('https://api.github.com/gists', {
+        method: 'POST',
+        body: JSON.stringify({
+          description: GIST_DESCRIPTION,
+          public: false,
+          files: { [GIST_FILENAME]: { content: JSON.stringify(collectLocalState(), null, 2) } },
+        }),
+      })
+      const created = await createResp.json()
+      return created.id
+    }
+
+    async function syncPull() {
+      if (!getSyncToken()) return { ok: false, reason: 'no-token' }
+      setSyncStatus('syncing')
+      try {
+        let gistId = getSyncGistId()
+        if (!gistId) {
+          gistId = await findOrCreateGist()
+          setSyncGistId(gistId)
+        }
+        const resp = await ghFetch('https://api.github.com/gists/' + gistId)
+        const gist = await resp.json()
+        const file = gist.files && gist.files[GIST_FILENAME]
+        if (file && file.content) {
+          try {
+            const state = JSON.parse(file.content)
+            applyRemoteState(state)
+          } catch (_) { /* corrupt file — ignore, next push overwrites */ }
+        }
+        setSyncStatus('synced')
+        return { ok: true }
+      } catch (e) {
+        setSyncStatus('error')
+        return { ok: false, reason: e.message }
+      }
+    }
+
+    async function syncPushNow() {
+      if (suppressSync) return
+      if (!getSyncToken()) return
+      const gistId = getSyncGistId()
+      if (!gistId) return
+      setSyncStatus('syncing')
+      try {
+        await ghFetch('https://api.github.com/gists/' + gistId, {
+          method: 'PATCH',
+          body: JSON.stringify({
+            files: { [GIST_FILENAME]: { content: JSON.stringify(collectLocalState(), null, 2) } },
+          }),
+        })
+        setSyncStatus('synced')
+      } catch (e) {
+        setSyncStatus('error')
+      }
+    }
+
+    function syncPushDebounced() {
+      if (suppressSync) return
+      clearTimeout(syncPushTimer)
+      syncPushTimer = setTimeout(syncPushNow, 600)
+    }
+
+    // ─── Modal wiring ───
+    function openSyncModal() {
+      const modal = document.getElementById('sync-modal')
+      const err = document.getElementById('sync-error')
+      const input = document.getElementById('sync-token-input')
+      const disconnectBtn = document.getElementById('sync-disconnect-btn')
+      const statusPanel = document.getElementById('sync-status-panel')
+      err.textContent = ''
+      input.value = ''
+      const connected = !!getSyncToken()
+      disconnectBtn.classList.toggle('hidden', !connected)
+      statusPanel.classList.remove('show', 'status-synced', 'status-error')
+      if (connected) {
+        statusPanel.classList.add('show', currentSyncStatus === 'error' ? 'status-error' : 'status-synced')
+        statusPanel.textContent = currentSyncStatus === 'error'
+          ? 'Connected, but last sync failed. Try replacing the token or reconnecting.'
+          : 'Connected. Any change on this device will sync to your other devices when they open the portal.'
+      }
+      modal.classList.remove('hidden')
+      setTimeout(() => input.focus(), 50)
+    }
+    function closeSyncModal() {
+      document.getElementById('sync-modal').classList.add('hidden')
+    }
+    async function submitSyncToken() {
+      const err = document.getElementById('sync-error')
+      const input = document.getElementById('sync-token-input')
+      const token = (input.value || '').trim()
+      if (!token) { err.textContent = 'Paste your token first.'; return }
+      err.textContent = 'Connecting…'
+      setSyncToken(token)
+      localStorage.removeItem(SYNC_GIST_ID_KEY)
+      const result = await syncPull()
+      if (result.ok) {
+        err.textContent = ''
+        closeSyncModal()
+        renderPortal()
+      } else if (result.reason === 'bad-token') {
+        err.textContent = 'That token was rejected. Make sure it has the `gist` scope.'
+        clearSyncCreds()
+        setSyncStatus('none')
+      } else {
+        err.textContent = 'Could not reach GitHub. Check your connection and try again.'
+      }
+    }
+    function disconnectSync() {
+      if (!confirm('Disconnect sync? Your local state stays. The gist remains in your GitHub account.')) return
+      clearSyncCreds()
+      setSyncStatus('none')
+      closeSyncModal()
+    }
+
     // ─── Per-section tool ordering (persisted, per-device) ───
     // A tool "key" is either "h:<name>" for hardcoded PORTAL tools or "c:<id>"
     // for custom ones — stable across renders, and unique across both sources.
@@ -1403,6 +1822,7 @@
     }
     function saveToolOrder(all) {
       localStorage.setItem(TOOL_ORDER_KEY, JSON.stringify(all))
+      if (typeof syncPushDebounced === 'function') syncPushDebounced()
     }
     function toolKey(tool) {
       // For hardcoded tools use the ORIGINAL name so renames don't reset order.
