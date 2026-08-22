@@ -423,10 +423,27 @@
     }
     .tool:hover .tool-edit-icon { color: #7c3aed; }
 
-    .tool-url-input {
+    /* Edit form (name + description + URL) — hidden until the row is editing. */
+    .tool-edit-fields {
       display: none;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .tool-edit-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .tool-edit-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+    .tool-edit-input {
       width: 100%;
-      margin-top: 8px;
       padding: 7px 10px;
       border: 1px solid var(--border-strong);
       border-radius: 8px;
@@ -436,12 +453,13 @@
       color: var(--ink);
       outline: none;
     }
-    .tool-url-input:focus {
+    .tool-edit-input:focus {
       border-color: rgba(124, 58, 237, 0.5);
       box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
     }
+    .tool.editing .tool-name,
     .tool.editing .tool-description { display: none; }
-    .tool.editing .tool-url-input { display: block; }
+    .tool.editing .tool-edit-fields { display: flex; }
     .tool.editing .tool-edit-actions { display: flex; }
     .tool.editing .tool-edit-icon { color: #7c3aed; }
 
@@ -1279,19 +1297,54 @@
       })
     }
 
+    // Overrides for hardcoded tools. Keyed by the tool's ORIGINAL name so a
+    // rename doesn't break the mapping. Shape: { [origName]: { name?, description?, url? } }.
+    // Older versions stored a bare URL string per name — migrated on read.
     function getOverrides() {
-      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') }
-      catch { return {} }
+      try {
+        const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')
+        let migrated = false
+        for (const k of Object.keys(raw)) {
+          if (typeof raw[k] === 'string') { raw[k] = { url: raw[k] }; migrated = true }
+        }
+        if (migrated) localStorage.setItem(STORAGE_KEY, JSON.stringify(raw))
+        return raw
+      } catch { return {} }
     }
-    function setOverride(name, url) {
+    function setOverride(origName, changes) {
+      // changes: { name?, description?, url? } — pass '' to clear that field.
       const overrides = getOverrides()
-      if (url && url.trim()) overrides[name] = url.trim()
-      else delete overrides[name]
+      const current = { ...(overrides[origName] || {}) }
+      for (const key of ['name', 'description', 'url']) {
+        if (key in changes) {
+          const val = (changes[key] || '').trim()
+          if (val === '') delete current[key]
+          else current[key] = val
+        }
+      }
+      if (Object.keys(current).length === 0) delete overrides[origName]
+      else overrides[origName] = current
       localStorage.setItem(STORAGE_KEY, JSON.stringify(overrides))
     }
-    function resolveUrl(tool) {
-      const overrides = getOverrides()
-      return overrides[tool.name] !== undefined ? overrides[tool.name] : tool.url
+    function resolveTool(tool) {
+      // Attach _origName so ordering keys and override lookups stay stable
+      // across name edits. Custom tools already own their own values.
+      if (tool.custom) return { ...tool, _origName: tool.name }
+      const o = getOverrides()[tool.name] || {}
+      return {
+        ...tool,
+        name: o.name != null ? o.name : tool.name,
+        description: o.description != null ? o.description : tool.description,
+        url: o.url != null ? o.url : tool.url,
+        _origName: tool.name,
+      }
+    }
+    function findOriginalHardcoded(origName) {
+      for (const s of PORTAL) {
+        const t = s.tools.find((x) => x.name === origName)
+        if (t) return t
+      }
+      return null
     }
 
     // ─── Custom tools (per-device, stored in localStorage) ───
@@ -1330,6 +1383,16 @@
       saveCustomTools(all)
       renderPortal()
     }
+    function updateCustomTool(company, id, changes) {
+      const all = getCustomTools()
+      if (!all[company]) return
+      const idx = all[company].findIndex((t) => t.id === id)
+      if (idx === -1) return
+      for (const key of ['name', 'description', 'url']) {
+        if (key in changes) all[company][idx][key] = (changes[key] || '').trim()
+      }
+      saveCustomTools(all)
+    }
 
     // ─── Per-section tool ordering (persisted, per-device) ───
     // A tool "key" is either "h:<name>" for hardcoded PORTAL tools or "c:<id>"
@@ -1342,7 +1405,8 @@
       localStorage.setItem(TOOL_ORDER_KEY, JSON.stringify(all))
     }
     function toolKey(tool) {
-      return tool.custom ? ('c:' + tool.id) : ('h:' + tool.name)
+      // For hardcoded tools use the ORIGINAL name so renames don't reset order.
+      return tool.custom ? ('c:' + tool.id) : ('h:' + (tool._origName || tool.name))
     }
     function applyOrder(tools, savedOrder) {
       if (!savedOrder || !savedOrder.length) return tools
@@ -1375,18 +1439,30 @@
       renderPortal()
     }
 
-    function startEdit(row, input) {
+    function startEdit(row, firstInput) {
       document.querySelectorAll('.tool.editing').forEach((r) => {
         if (r !== row) r.classList.remove('editing')
       })
       row.classList.add('editing')
-      setTimeout(() => { input.focus(); input.select() }, 0)
+      setTimeout(() => { firstInput.focus(); firstInput.select() }, 0)
     }
     function cancelEdit(row) {
       row.classList.remove('editing')
     }
-    function commitEdit(row, tool, url) {
-      setOverride(tool.name, url)
+    function commitEdit(row, tool, changes) {
+      // changes: { name, description, url } — the current values from the three inputs.
+      if (tool.custom) {
+        updateCustomTool(row.dataset.company, tool.id, changes)
+      } else {
+        // For hardcoded tools, only store overrides that differ from the original,
+        // so reverting to defaults just wipes the override.
+        const orig = findOriginalHardcoded(tool._origName || tool.name)
+        setOverride(tool._origName || tool.name, {
+          name: !orig || changes.name === orig.name ? '' : changes.name,
+          description: !orig || changes.description === orig.description ? '' : changes.description,
+          url: !orig || changes.url === orig.url ? '' : changes.url,
+        })
+      }
       row.classList.remove('editing')
       renderPortal()
     }
@@ -1436,19 +1512,21 @@
         list.className = 'tools-list'
 
         // Combine hardcoded tools with per-device custom tools for this section,
-        // then apply the saved per-section order.
+        // apply the saved per-section order, and resolve any overrides into the
+        // final displayed shape.
         const customTools = getCustomTools()[section.company] || []
         const allTools = applyOrder(
           section.tools.concat(customTools),
           getToolOrder()[section.company]
-        )
+        ).map(resolveTool)
 
         allTools.forEach((tool, toolIdx) => {
-          const currentUrl = resolveUrl(tool)
+          const currentUrl = tool.url
           const hasUrl = currentUrl && currentUrl.trim() !== ''
 
           const row = document.createElement(editMode ? 'div' : (hasUrl ? 'a' : 'div'))
           row.className = 'tool' + (hasUrl ? '' : ' disabled')
+          row.dataset.company = section.company
           if (!editMode && hasUrl) {
             row.href = currentUrl
             row.target = '_blank'
@@ -1503,17 +1581,50 @@
           toolDesc.textContent = tool.description
           body.appendChild(toolDesc)
 
-          const input = document.createElement('input')
-          input.className = 'tool-url-input'
-          input.type = 'url'
-          input.placeholder = 'https://...'
-          input.value = currentUrl || ''
-          input.addEventListener('click', (e) => e.stopPropagation())
-          input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') { e.preventDefault(); commitEdit(row, tool, input.value) }
-            if (e.key === 'Escape') { e.preventDefault(); cancelEdit(row) }
+          // Edit form — three fields (name, description, URL) stacked, only
+          // visible when the row is in `.editing` state.
+          const fields = document.createElement('div')
+          fields.className = 'tool-edit-fields'
+
+          const makeField = (labelText, type, value, placeholder) => {
+            const wrap = document.createElement('label')
+            wrap.className = 'tool-edit-field'
+            const lbl = document.createElement('span')
+            lbl.className = 'tool-edit-label'
+            lbl.textContent = labelText
+            const inp = document.createElement('input')
+            inp.className = 'tool-edit-input'
+            inp.type = type
+            inp.value = value || ''
+            if (placeholder) inp.placeholder = placeholder
+            inp.addEventListener('click', (e) => e.stopPropagation())
+            wrap.appendChild(lbl)
+            wrap.appendChild(inp)
+            return { wrap, input: inp }
+          }
+
+          const nameField = makeField('Name', 'text', tool.name, 'Link name')
+          const descField = makeField('Description', 'text', tool.description, 'Short description')
+          const urlField = makeField('URL', 'url', currentUrl, 'https://...')
+
+          fields.appendChild(nameField.wrap)
+          fields.appendChild(descField.wrap)
+          fields.appendChild(urlField.wrap)
+          body.appendChild(fields)
+
+          const collectChanges = () => ({
+            name: nameField.input.value.trim(),
+            description: descField.input.value.trim(),
+            url: urlField.input.value.trim(),
           })
-          body.appendChild(input)
+
+          const onFieldKey = (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); commitEdit(row, tool, collectChanges()) }
+            if (e.key === 'Escape') { e.preventDefault(); cancelEdit(row) }
+          }
+          nameField.input.addEventListener('keydown', onFieldKey)
+          descField.input.addEventListener('keydown', onFieldKey)
+          urlField.input.addEventListener('keydown', onFieldKey)
 
           const actions = document.createElement('div')
           actions.className = 'tool-edit-actions'
@@ -1523,7 +1634,7 @@
           saveBtn.textContent = 'Save'
           saveBtn.addEventListener('click', (e) => {
             e.stopPropagation(); e.preventDefault()
-            commitEdit(row, tool, input.value)
+            commitEdit(row, tool, collectChanges())
           })
           const cancelBtn = document.createElement('button')
           cancelBtn.type = 'button'
@@ -1552,7 +1663,7 @@
           if (editMode) {
             row.addEventListener('click', (e) => {
               if (e.target.closest('input, button')) return
-              startEdit(row, input)
+              startEdit(row, nameField.input)
             })
           }
 
