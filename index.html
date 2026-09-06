@@ -1190,6 +1190,74 @@
       .panel, .hud { opacity: 1; transform: none; }
       .hud-svg animateTransform { display: none; }
     }
+
+    /* ─── Company editor & panel controls ─── */
+    .company-label {
+      display: block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-dim, #71717a);
+      margin: 14px 0 6px;
+    }
+    .company-logo-row { display: flex; gap: 12px; align-items: flex-start; }
+    .company-logo-preview {
+      width: 96px; height: 56px; flex: none;
+      border: 1px dashed rgba(0,0,0,0.18); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.6); overflow: hidden;
+    }
+    .company-logo-preview img { max-width: 84px; max-height: 44px; object-fit: contain; }
+    .company-logo-preview span { font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; color: #a1a1aa; }
+    .company-logo-actions { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+    .company-logo-btns { display: flex; gap: 8px; }
+    .company-hint { font-size: 11px; line-height: 1.5; color: #71717a; margin: 8px 0 0; }
+    .company-color-row { display: flex; align-items: center; gap: 12px; }
+    .company-color { width: 52px; height: 32px; padding: 0; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; background: none; cursor: pointer; }
+    .company-color-value { font-size: 12px; font-variant-numeric: tabular-nums; color: #71717a; }
+
+    .panel-controls { display: none; gap: 4px; margin-left: 8px; }
+    body.edit-mode .panel-controls { display: inline-flex; }
+    .panel-ctl {
+      width: 20px; height: 20px; flex: none;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1px solid rgba(0,0,0,0.12); border-radius: 6px;
+      background: rgba(255,255,255,0.75); color: #52525b;
+      font-size: 11px; line-height: 1; cursor: pointer; padding: 0;
+      transition: color .15s, border-color .15s, background .15s;
+    }
+    .panel-ctl:hover { color: #18181b; border-color: rgba(0,0,0,0.3); background: #fff; }
+    .panel-ctl:disabled { opacity: 0.3; cursor: default; }
+    .panel-ctl.danger:hover { color: #b91c1c; border-color: #b91c1c; }
+    .panel-ctl:focus-visible { outline: 2px solid #7c3aed; outline-offset: 1px; }
+
+    .panel.add-company {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 120px; border: 1px dashed rgba(0,0,0,0.18);
+      background: rgba(255,255,255,0.4); cursor: pointer;
+    }
+    .panel.add-company:hover { border-color: rgba(0,0,0,0.35); background: rgba(255,255,255,0.7); }
+    .panel.add-company span { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; color: #52525b; }
+
+    .hidden-bar {
+      grid-column: 1 / -1;
+      display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+      padding: 10px 2px 0;
+    }
+    .hidden-bar-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: #a1a1aa;
+    }
+    .hidden-chip {
+      display: inline-flex; align-items: center; gap: 8px;
+      border: 1px dashed rgba(0,0,0,0.2); border-radius: 999px;
+      background: rgba(255,255,255,0.6); color: #52525b;
+      font-size: 11px; padding: 4px 10px; cursor: pointer;
+    }
+    .hidden-chip:hover { border-color: rgba(0,0,0,0.4); color: #18181b; background: #fff; }
+    .hidden-chip-plus { font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; color: #7c3aed; font-weight: 700; }
+
   </style>
 </head>
 
@@ -1237,6 +1305,51 @@
         <button class="sync-action-btn" id="sync-cancel-btn" type="button">Cancel</button>
       </div>
       <div class="sync-error" id="sync-error"></div>
+    </div>
+  </div>
+
+  <!-- Company editor — opens from "+ Add company" or the pencil on a panel. -->
+  <div class="sync-modal hidden" id="company-modal">
+    <div class="sync-backdrop" id="company-backdrop"></div>
+    <div class="sync-card">
+      <button class="sync-close" id="company-close" type="button" aria-label="Close">×</button>
+      <h2 class="sync-title" id="company-modal-title">New company</h2>
+      <p class="sync-subtitle">
+        The name is the panel heading. The logo is optional — without one the panel shows the name in text.
+      </p>
+
+      <label class="company-label" for="company-name-input">Name</label>
+      <input type="text" class="sync-input" id="company-name-input" placeholder="e.g. Médica" autocomplete="off" />
+
+      <label class="company-label">Logo</label>
+      <div class="company-logo-row">
+        <div class="company-logo-preview" id="company-logo-preview"><span>no logo</span></div>
+        <div class="company-logo-actions">
+          <input type="text" class="sync-input" id="company-logo-input" placeholder="https://… or pick a file" autocomplete="off" />
+          <div class="company-logo-btns">
+            <button class="sync-action-btn" id="company-logo-file-btn" type="button">Choose file…</button>
+            <button class="sync-action-btn" id="company-logo-clear-btn" type="button">Remove</button>
+          </div>
+          <input type="file" id="company-logo-file" accept="image/*" hidden />
+        </div>
+      </div>
+      <p class="company-hint">
+        A picked file is shrunk to 64&nbsp;px tall and stored inside the portal, so it syncs with everything else.
+        A pasted URL is stored as-is.
+      </p>
+
+      <label class="company-label" for="company-color-input">Accent colour</label>
+      <div class="company-color-row">
+        <input type="color" class="company-color" id="company-color-input" value="#3878c0" />
+        <span class="company-color-value" id="company-color-value">56, 120, 192</span>
+      </div>
+
+      <div class="sync-actions">
+        <button class="sync-action-btn primary" id="company-save-btn" type="button">Save</button>
+        <button class="sync-action-btn danger hidden" id="company-delete-btn" type="button">Delete</button>
+        <button class="sync-action-btn" id="company-cancel-btn" type="button">Cancel</button>
+      </div>
+      <div class="sync-error" id="company-error"></div>
     </div>
   </div>
 
@@ -1425,6 +1538,10 @@
     const CUSTOM_TOOLS_KEY = 'portal-custom-tools'
     const TOOL_ORDER_KEY = 'portal-tool-order'
     const AUTH_KEY = 'portal-auth'
+    const CUSTOM_COMPANIES_KEY = 'portal-custom-companies'
+    const COMPANY_OVERRIDES_KEY = 'portal-company-overrides'
+    const COMPANY_ORDER_KEY = 'portal-company-order'
+    const HIDDEN_COMPANIES_KEY = 'portal-hidden-companies'
     let editMode = false
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -1460,6 +1577,42 @@
       setGreeting()
       rotateInsight()
       document.getElementById('edit-toggle').addEventListener('click', toggleEditMode)
+
+      // Company modal
+      document.getElementById('company-close').addEventListener('click', closeCompanyModal)
+      document.getElementById('company-cancel-btn').addEventListener('click', closeCompanyModal)
+      document.getElementById('company-backdrop').addEventListener('click', closeCompanyModal)
+      document.getElementById('company-save-btn').addEventListener('click', saveCompanyFromModal)
+      document.getElementById('company-delete-btn').addEventListener('click', () => {
+        const section = companyEditing
+        closeCompanyModal()
+        if (section) deleteCompany(section)
+      })
+      document.getElementById('company-logo-file-btn').addEventListener('click', () => {
+        document.getElementById('company-logo-file').click()
+      })
+      document.getElementById('company-logo-file').addEventListener('change', (e) => {
+        readLogoFile(e.target.files && e.target.files[0])
+        e.target.value = ''
+      })
+      document.getElementById('company-logo-clear-btn').addEventListener('click', () => {
+        document.getElementById('company-logo-input').value = ''
+        setCompanyLogoPreview('')
+      })
+      document.getElementById('company-logo-input').addEventListener('input', (e) => {
+        setCompanyLogoPreview(e.target.value.trim())
+      })
+      document.getElementById('company-color-input').addEventListener('input', (e) => {
+        document.getElementById('company-color-value').textContent = hexToRgbString(e.target.value) || ''
+      })
+      document.getElementById('company-name-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); saveCompanyFromModal() }
+      })
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !document.getElementById('company-modal').classList.contains('hidden')) {
+          closeCompanyModal()
+        }
+      })
       document.getElementById('logout-btn').addEventListener('click', logout)
       document.getElementById('sync-btn').addEventListener('click', openSyncModal)
       document.getElementById('sync-close').addEventListener('click', closeSyncModal)
@@ -1667,6 +1820,10 @@
         overrides: getOverrides(),
         customTools: getCustomTools(),
         toolOrder: getToolOrder(),
+        customCompanies: getCustomCompanies(),
+        companyOverrides: getCompanyOverrides(),
+        companyOrder: getCompanyOrder(),
+        hiddenCompanies: getHiddenCompanies(),
       }
     }
 
@@ -1677,6 +1834,21 @@
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state.overrides || {}))
         localStorage.setItem(CUSTOM_TOOLS_KEY, JSON.stringify(state.customTools || {}))
         localStorage.setItem(TOOL_ORDER_KEY, JSON.stringify(state.toolOrder || {}))
+        // Companies. A device still on the previous version sends no company
+        // fields at all; `|| []` would then wipe this device's companies on the
+        // first pull. Only write what the payload actually carries.
+        if ('customCompanies' in state) {
+          localStorage.setItem(CUSTOM_COMPANIES_KEY, JSON.stringify(state.customCompanies || []))
+        }
+        if ('companyOverrides' in state) {
+          localStorage.setItem(COMPANY_OVERRIDES_KEY, JSON.stringify(state.companyOverrides || {}))
+        }
+        if ('companyOrder' in state) {
+          localStorage.setItem(COMPANY_ORDER_KEY, JSON.stringify(state.companyOrder || []))
+        }
+        if ('hiddenCompanies' in state) {
+          localStorage.setItem(HIDDEN_COMPANIES_KEY, JSON.stringify(state.hiddenCompanies || []))
+        }
       } finally {
         suppressSync = false
       }
@@ -1823,6 +1995,266 @@
     }
 
     // ─── Per-section tool ordering (persisted, per-device) ───
+    // ═══════════════════════════════════════════════════════════════════
+    //  Companies — the panels themselves.
+    //
+    //  A company can come from two places: the hardcoded PORTAL array (shipped
+    //  in this file, same on every device) or localStorage (added here, synced
+    //  through the gist). Both are edited the same way.
+    //
+    //  A company KEY is the stable identity used by every other store:
+    //    hardcoded → its ORIGINAL company name  ("Notions", "Print Pilot")
+    //    custom    → "c:" + its generated id
+    //
+    //  The hardcoded key is the bare original name ON PURPOSE — that is exactly
+    //  what portal-custom-tools / portal-tool-order already use, so everything
+    //  saved before this feature existed keeps working with no migration. And
+    //  because the key is the ORIGINAL name, renaming a company in the UI does
+    //  not orphan the links inside it.
+    // ═══════════════════════════════════════════════════════════════════
+
+    function getCustomCompanies() {
+      try {
+        const raw = JSON.parse(localStorage.getItem(CUSTOM_COMPANIES_KEY) || '[]')
+        return Array.isArray(raw) ? raw : []
+      } catch { return [] }
+    }
+    function saveCustomCompanies(list) {
+      localStorage.setItem(CUSTOM_COMPANIES_KEY, JSON.stringify(list))
+      if (typeof syncPushDebounced === 'function') syncPushDebounced()
+    }
+    function getCompanyOverrides() {
+      try { return JSON.parse(localStorage.getItem(COMPANY_OVERRIDES_KEY) || '{}') }
+      catch { return {} }
+    }
+    function saveCompanyOverrides(all) {
+      localStorage.setItem(COMPANY_OVERRIDES_KEY, JSON.stringify(all))
+      if (typeof syncPushDebounced === 'function') syncPushDebounced()
+    }
+    function getHiddenCompanies() {
+      try {
+        const raw = JSON.parse(localStorage.getItem(HIDDEN_COMPANIES_KEY) || '[]')
+        return Array.isArray(raw) ? raw : []
+      } catch { return [] }
+    }
+    function saveHiddenCompanies(list) {
+      localStorage.setItem(HIDDEN_COMPANIES_KEY, JSON.stringify(list))
+      if (typeof syncPushDebounced === 'function') syncPushDebounced()
+    }
+    function getCompanyOrder() {
+      try {
+        const raw = JSON.parse(localStorage.getItem(COMPANY_ORDER_KEY) || '[]')
+        return Array.isArray(raw) ? raw : []
+      } catch { return [] }
+    }
+    function saveCompanyOrder(keys) {
+      localStorage.setItem(COMPANY_ORDER_KEY, JSON.stringify(keys))
+      if (typeof syncPushDebounced === 'function') syncPushDebounced()
+    }
+
+    // Resolve PORTAL + custom companies + overrides + hidden + order into the
+    // list renderPortal walks. Everything downstream reads section._key.
+    function buildSections() {
+      const overrides = getCompanyOverrides()
+      const hidden = new Set(getHiddenCompanies())
+
+      const hardcoded = PORTAL
+        .filter((s) => !hidden.has(s.company))
+        .map((s) => {
+          const ov = overrides[s.company] || {}
+          return {
+            ...s,
+            company: ov.company || s.company,
+            logo: 'logo' in ov ? ov.logo : s.logo,
+            glow: ov.glow || s.glow,
+            _key: s.company,
+            _origCompany: s.company,
+            custom: false,
+          }
+        })
+
+      const custom = getCustomCompanies().map((c) => ({
+        company: c.company,
+        logo: c.logo || '',
+        glow: c.glow || '113, 113, 122',
+        tools: [],
+        _key: 'c:' + c.id,
+        _origCompany: c.company,
+        _id: c.id,
+        custom: true,
+      }))
+
+      return applyCompanyOrder(hardcoded.concat(custom), getCompanyOrder())
+    }
+
+    // Same shape as applyOrder for tools: saved keys first, anything new appended.
+    function applyCompanyOrder(sections, savedOrder) {
+      if (!savedOrder || !savedOrder.length) return sections
+      const byKey = new Map(sections.map((s) => [s._key, s]))
+      const ordered = []
+      const seen = new Set()
+      for (const k of savedOrder) {
+        if (byKey.has(k) && !seen.has(k)) { ordered.push(byKey.get(k)); seen.add(k) }
+      }
+      for (const s of sections) if (!seen.has(s._key)) ordered.push(s)
+      return ordered
+    }
+
+    function moveCompany(sections, from, direction) {
+      const to = from + direction
+      if (to < 0 || to >= sections.length) return
+      const keys = sections.map((s) => s._key)
+      ;[keys[from], keys[to]] = [keys[to], keys[from]]
+      saveCompanyOrder(keys)
+      renderPortal()
+    }
+
+    // Deleting a hardcoded company only HIDES it: the panel lives in this file
+    // and would come back on the next load. Hiding is per-device state, synced
+    // like everything else, and reversible from the file if it ever matters.
+    function deleteCompany(section) {
+      const label = section.company
+      const inside = (getCustomTools()[section._key] || []).length
+      const warn = inside
+        ? `\n\nIt has ${inside} link${inside === 1 ? '' : 's'} you added. They are kept, and come back if you restore the company.`
+        : ''
+      if (!confirm(`Remove "${label}" from the portal?${warn}`)) return
+
+      if (section.custom) {
+        saveCustomCompanies(getCustomCompanies().filter((c) => c.id !== section._id))
+      } else {
+        const hidden = getHiddenCompanies()
+        if (!hidden.includes(section._origCompany)) hidden.push(section._origCompany)
+        saveHiddenCompanies(hidden)
+      }
+      saveCompanyOrder(getCompanyOrder().filter((k) => k !== section._key))
+      renderPortal()
+    }
+
+    function restoreCompany(origCompany) {
+      saveHiddenCompanies(getHiddenCompanies().filter((c) => c !== origCompany))
+      renderPortal()
+    }
+
+    // ─── Company modal ───
+    let companyEditing = null   // null = creating; otherwise the section being edited
+
+    function hexToRgbString(hex) {
+      const m = /^#?([0-9a-f]{6})$/i.exec((hex || '').trim())
+      if (!m) return null
+      const n = parseInt(m[1], 16)
+      return `${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}`
+    }
+    function rgbStringToHex(rgb) {
+      const parts = String(rgb || '').split(',').map((p) => parseInt(p.trim(), 10))
+      if (parts.length !== 3 || parts.some((n) => !Number.isFinite(n))) return '#71717a'
+      return '#' + parts.map((n) => Math.max(0, Math.min(255, n)).toString(16).padStart(2, '0')).join('')
+    }
+
+    function setCompanyLogoPreview(src) {
+      const box = document.getElementById('company-logo-preview')
+      box.innerHTML = ''
+      if (src) {
+        const img = document.createElement('img')
+        img.src = src
+        img.alt = ''
+        img.addEventListener('error', () => { box.innerHTML = '<span>bad image</span>' })
+        box.appendChild(img)
+      } else {
+        box.innerHTML = '<span>no logo</span>'
+      }
+    }
+
+    function openCompanyModal(section) {
+      companyEditing = section || null
+      document.getElementById('company-modal-title').textContent =
+        section ? 'Edit company' : 'New company'
+      document.getElementById('company-name-input').value = section ? section.company : ''
+      document.getElementById('company-logo-input').value = section ? (section.logo || '') : ''
+      setCompanyLogoPreview(section ? section.logo : '')
+      const hex = rgbStringToHex(section ? section.glow : '56, 120, 192')
+      document.getElementById('company-color-input').value = hex
+      document.getElementById('company-color-value').textContent = hexToRgbString(hex) || ''
+      document.getElementById('company-delete-btn').classList.toggle('hidden', !section)
+      document.getElementById('company-error').textContent = ''
+      document.getElementById('company-modal').classList.remove('hidden')
+      setTimeout(() => document.getElementById('company-name-input').focus(), 0)
+    }
+    function closeCompanyModal() {
+      document.getElementById('company-modal').classList.add('hidden')
+      companyEditing = null
+    }
+
+    function saveCompanyFromModal() {
+      const err = document.getElementById('company-error')
+      const name = document.getElementById('company-name-input').value.trim()
+      const logo = document.getElementById('company-logo-input').value.trim()
+      const glow = hexToRgbString(document.getElementById('company-color-input').value) || '113, 113, 122'
+      if (!name) { err.textContent = 'The company needs a name.'; return }
+
+      if (!companyEditing) {
+        const list = getCustomCompanies()
+        list.push({
+          id: 'co-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+          company: name, logo, glow,
+        })
+        saveCustomCompanies(list)
+      } else if (companyEditing.custom) {
+        const list = getCustomCompanies()
+        const idx = list.findIndex((c) => c.id === companyEditing._id)
+        if (idx !== -1) {
+          list[idx] = { ...list[idx], company: name, logo, glow }
+          saveCustomCompanies(list)
+        }
+      } else {
+        // Hardcoded: store only what differs from the file, so clearing a field
+        // reverts to the shipped value instead of freezing today's copy.
+        const orig = PORTAL.find((s) => s.company === companyEditing._origCompany)
+        const ov = getCompanyOverrides()
+        const next = {}
+        if (orig && name !== orig.company) next.company = name
+        if (orig && logo !== (orig.logo || '')) next.logo = logo
+        if (orig && glow !== orig.glow) next.glow = glow
+        if (Object.keys(next).length) ov[companyEditing._origCompany] = next
+        else delete ov[companyEditing._origCompany]
+        saveCompanyOverrides(ov)
+      }
+      closeCompanyModal()
+      renderPortal()
+    }
+
+    // A picked file is downscaled before it is stored. Full-size logos are
+    // hundreds of KB as data URIs, and every byte would travel to the gist on
+    // each sync — the panel never draws one taller than ~22 px anyway.
+    function readLogoFile(file) {
+      const err = document.getElementById('company-error')
+      if (!file) return
+      if (!file.type.startsWith('image/')) { err.textContent = 'That file is not an image.'; return }
+      const reader = new FileReader()
+      reader.onload = () => {
+        const img = new Image()
+        img.onload = () => {
+          const H = 64
+          const scale = Math.min(1, H / img.height)
+          const w = Math.max(1, Math.round(img.width * scale))
+          const h = Math.max(1, Math.round(img.height * scale))
+          const canvas = document.createElement('canvas')
+          canvas.width = w; canvas.height = h
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h)
+          let data
+          try { data = canvas.toDataURL('image/png') }
+          catch { err.textContent = 'Could not read that image.'; return }
+          document.getElementById('company-logo-input').value = data
+          setCompanyLogoPreview(data)
+          err.textContent = ''
+        }
+        img.onerror = () => { err.textContent = 'Could not read that image.' }
+        img.src = reader.result
+      }
+      reader.onerror = () => { err.textContent = 'Could not read that file.' }
+      reader.readAsDataURL(file)
+    }
+
     // A tool "key" is either "h:<name>" for hardcoded PORTAL tools or "c:<id>"
     // for custom ones — stable across renders, and unique across both sources.
     function getToolOrder() {
@@ -1911,7 +2343,8 @@
       const root = document.getElementById('portal-root')
       root.innerHTML = ''
 
-      PORTAL.forEach((section) => {
+      const sections = buildSections()
+      sections.forEach((section, sectionIdx) => {
         const panel = document.createElement('section')
         panel.className = 'panel'
         panel.style.setProperty('--panel-glow', section.glow)
@@ -1935,6 +2368,27 @@
         name.className = 'panel-name'
         name.textContent = section.company
         header.appendChild(name)
+
+        // Company controls — only in edit mode.
+        const ctls = document.createElement('div')
+        ctls.className = 'panel-controls'
+        const mkCtl = (label, title, onClick, opts = {}) => {
+          const b = document.createElement('button')
+          b.type = 'button'
+          b.className = 'panel-ctl' + (opts.danger ? ' danger' : '')
+          b.textContent = label
+          b.title = title
+          b.setAttribute('aria-label', title)
+          if (opts.disabled) b.disabled = true
+          b.addEventListener('click', (e) => { e.stopPropagation(); onClick() })
+          return b
+        }
+        ctls.appendChild(mkCtl('←', 'Move left', () => moveCompany(sections, sectionIdx, -1), { disabled: sectionIdx === 0 }))
+        ctls.appendChild(mkCtl('→', 'Move right', () => moveCompany(sections, sectionIdx, +1), { disabled: sectionIdx === sections.length - 1 }))
+        ctls.appendChild(mkCtl('✎', 'Edit company', () => openCompanyModal(section)))
+        ctls.appendChild(mkCtl('×', 'Remove company', () => deleteCompany(section), { danger: true }))
+        header.appendChild(ctls)
+
         panel.appendChild(header)
 
         const list = document.createElement('div')
@@ -1943,10 +2397,10 @@
         // Combine hardcoded tools with per-device custom tools for this section,
         // apply the saved per-section order, and resolve any overrides into the
         // final displayed shape.
-        const customTools = getCustomTools()[section.company] || []
+        const customTools = getCustomTools()[section._key] || []
         const allTools = applyOrder(
           section.tools.concat(customTools),
-          getToolOrder()[section.company]
+          getToolOrder()[section._key]
         ).map(resolveTool)
 
         allTools.forEach((tool, toolIdx) => {
@@ -1955,7 +2409,7 @@
 
           const row = document.createElement(editMode ? 'div' : (hasUrl ? 'a' : 'div'))
           row.className = 'tool' + (hasUrl ? '' : ' disabled')
-          row.dataset.company = section.company
+          row.dataset.company = section._key
           if (!editMode && hasUrl) {
             row.href = currentUrl
             row.target = '_blank'
@@ -1975,7 +2429,7 @@
             upBtn.textContent = '▲'
             upBtn.addEventListener('click', (e) => {
               e.stopPropagation(); e.preventDefault()
-              moveTool(section.company, allTools, toolIdx, -1)
+              moveTool(section._key, allTools, toolIdx, -1)
             })
             const downBtn = document.createElement('button')
             downBtn.type = 'button'
@@ -1986,7 +2440,7 @@
             downBtn.textContent = '▼'
             downBtn.addEventListener('click', (e) => {
               e.stopPropagation(); e.preventDefault()
-              moveTool(section.company, allTools, toolIdx, +1)
+              moveTool(section._key, allTools, toolIdx, +1)
             })
             reorder.appendChild(upBtn)
             reorder.appendChild(downBtn)
@@ -2106,7 +2560,7 @@
             delBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
             delBtn.addEventListener('click', (e) => {
               e.stopPropagation(); e.preventDefault()
-              removeCustomTool(section.company, tool.id)
+              removeCustomTool(section._key, tool.id)
             })
             row.appendChild(delBtn)
           }
@@ -2120,13 +2574,46 @@
           addBtn.type = 'button'
           addBtn.className = 'tool-add-btn'
           addBtn.innerHTML = '<span class="tool-add-icon">+</span><span>Add link</span>'
-          addBtn.addEventListener('click', () => addCustomTool(section.company))
+          addBtn.addEventListener('click', () => addCustomTool(section._key))
           list.appendChild(addBtn)
         }
 
         panel.appendChild(list)
         root.appendChild(panel)
       })
+
+      // "+ Add company" card at the end of the grid — only in edit mode.
+      if (editMode) {
+        const addPanel = document.createElement('button')
+        addPanel.type = 'button'
+        addPanel.className = 'panel add-company'
+        addPanel.innerHTML = '<span>+ Add company</span>'
+        addPanel.addEventListener('click', () => openCompanyModal(null))
+        root.appendChild(addPanel)
+
+        // Removed built-in companies, with a way back. Hiding one would be a
+        // one-way door otherwise: the panel lives in this file, so nothing in
+        // the UI could bring it back.
+        const hidden = getHiddenCompanies().filter((h) => PORTAL.some((p) => p.company === h))
+        if (hidden.length) {
+          const bar = document.createElement('div')
+          bar.className = 'hidden-bar'
+          const label = document.createElement('span')
+          label.className = 'hidden-bar-label'
+          label.textContent = hidden.length === 1 ? 'Removed:' : 'Removed:'
+          bar.appendChild(label)
+          hidden.forEach((name) => {
+            const chip = document.createElement('button')
+            chip.type = 'button'
+            chip.className = 'hidden-chip'
+            chip.innerHTML = '<span>' + name + '</span><span class="hidden-chip-plus">restore</span>'
+            chip.title = 'Bring "' + name + '" back'
+            chip.addEventListener('click', () => restoreCompany(name))
+            bar.appendChild(chip)
+          })
+          root.appendChild(bar)
+        }
+      }
     }
 
     function setGreeting() {
