@@ -51,7 +51,8 @@
         logo: 'logos/now.png',
         glow: '49, 46, 129',
         tools: [
-          { name: 'NowTrack', description: 'Tracking and logistics operations', url: 'https://nowtrack.com.do' },
+          { name: 'NowTrack Customer', description: 'Customer Portal', url: 'https://nowtrack.com.do' },
+          { name: 'NowTrack WMS', description: 'Tracking and logistics operations', url: 'https://wms.nowtrack.com.do/' },
         ],
       },
       {
@@ -62,7 +63,10 @@
           { name: 'Store', description: 'Tienda online · printpilot.store', url: 'https://printpilot.store' },
           { name: 'PP NowTrack', description: 'Logistics tracking for Print Pilot', url: 'https://stage-printpilot.nowtrack.com.do' },
           { name: 'PPC', description: 'PrintFlow Customizer', url: 'https://printpilot.store' },
+          { name: 'PP Business Central', description: 'Business Central USA y RD', url: 'https://businesscentral.dynamics.com/' },
           { name: 'PPQ', description: 'PrintPilot Quotes', url: 'https://ppq.printpilot.store' },
+          { name: 'PPQ New', description: 'PrintPilot Quotes NEW', url: 'https://stage-quote.printpilot.store' },
+          { name: 'PPC Admin', description: 'PPC Admin', url: 'https://admin.shopify.com/store/fe2v10-ua/apps/print-pilot-customizer-1/admin' },
         ],
       },
     ]
@@ -2342,7 +2346,65 @@
       })
     }
 
+    // Links que nacieron como custom y ahora vienen en el archivo.
+    //
+    // renderPortal concatena las herramientas del archivo con las de
+    // localStorage, asi que sin esto cada uno de los cuatro que Fernando habia
+    // agregado a mano saldria DOS veces: una del archivo y otra del gist.
+    //
+    // El match es por URL, no por nombre, porque al pasarlos se corrigio
+    // "PP Bussines Central" a "PP Business Central" — por nombre no cuadraria.
+    // Y la clave del orden se REESCRIBE de "c:<id>" a "h:<nombre>" para que la
+    // posicion que Fernando le habia dado a mano no se pierda.
+    //
+    // Corre en cada render a proposito: un pull del gist vuelve a meter el
+    // estado viejo, asi que hacerlo una sola vez al arrancar no bastaria. Es
+    // idempotente y solo escribe si de verdad quito algo.
+    function dropCustomToolsNowInFile() {
+      const custom = getCustomTools()
+      const orders = getToolOrder()
+      let changed = false
+
+      for (const section of PORTAL) {
+        const mine = custom[section.company]
+        if (!mine || !mine.length) continue
+        const norm = (u) => String(u || '').trim().replace(/\/+$/, '').toLowerCase()
+        const byUrl = new Map(section.tools.map((t) => [norm(t.url), t.name]))
+
+        const kept = []
+        for (const tool of mine) {
+          const hardcodedName = byUrl.get(norm(tool.url))
+          if (!hardcodedName) { kept.push(tool); continue }
+          changed = true
+          const order = orders[section.company]
+          if (order) {
+            const i = order.indexOf('c:' + tool.id)
+            if (i !== -1) order[i] = 'h:' + hardcodedName
+          }
+        }
+        if (kept.length) custom[section.company] = kept
+        else delete custom[section.company]
+      }
+
+      // Overrides huerfanos: se guardan por el nombre ORIGINAL, asi que si ese
+      // nombre ya no esta en el archivo (NowTrack paso a NowTrack Customer)
+      // nadie los va a mirar nunca mas.
+      const overrides = getOverrides()
+      const vivos = new Set(PORTAL.flatMap((s) => s.tools.map((t) => t.name)))
+      for (const k of Object.keys(overrides)) {
+        if (!vivos.has(k)) { delete overrides[k]; changed = true }
+      }
+
+      if (changed) {
+        localStorage.setItem(CUSTOM_TOOLS_KEY, JSON.stringify(custom))
+        localStorage.setItem(TOOL_ORDER_KEY, JSON.stringify(orders))
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(overrides))
+        if (typeof syncPushDebounced === 'function') syncPushDebounced()
+      }
+    }
+
     function renderPortal() {
+      dropCustomToolsNowInFile()
       const root = document.getElementById('portal-root')
       root.innerHTML = ''
 
