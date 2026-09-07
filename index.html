@@ -898,7 +898,7 @@
       gap: 12px;
       width: 100%;
       max-width: 720px;
-      margin: 22px auto 6px auto;
+      margin: 6px auto 18px auto;
       padding: 14px 20px;
       background: var(--surface);
       border: 1px solid var(--border);
@@ -979,6 +979,9 @@
     .panel:nth-child(2) { animation-delay: 1.0s; }
     .panel:nth-child(3) { animation-delay: 1.1s; }
     .panel:nth-child(4) { animation-delay: 1.2s; }
+    /* Con mas de cuatro empresas los siguientes entraban sin retardo, de
+       golpe y antes que los primeros. Un solo escalon extra basta. */
+    .panel:nth-child(n+5) { animation-delay: 1.3s; }
     @keyframes section-in {
       to { opacity: 1; transform: translateY(0); }
     }
@@ -1493,8 +1496,6 @@
       </div>
     </div>
 
-    <main class="dashboard" id="portal-root"></main>
-
     <form class="search-form" id="google-search" action="https://www.google.com/search" method="GET" role="search" autocomplete="off">
       <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <circle cx="11" cy="11" r="8"/>
@@ -1515,6 +1516,8 @@
       />
       <span class="search-hint">⏎</span>
     </form>
+    <main class="dashboard" id="portal-root"></main>
+
 
     <footer class="footer">
       <span>Personal portal · Notions Group</span>
